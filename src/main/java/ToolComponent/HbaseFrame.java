@@ -1,11 +1,8 @@
-package HbaseFramePackage;
-
-import ConnectTreePackage.HbaseConnectTree;
-import MenuPackage.HbaseMenu;
-import ToolPackage.HbaseToolWrapper;
+package ToolComponent;
 
 import javax.swing.*;
 import java.awt.*;
+
 
 /**
  * 软件界面
@@ -15,7 +12,8 @@ public class HbaseFrame extends JFrame {
         setLayout(new BorderLayout());
         AddHbaseMenu();
         AddHbaseTool();
-        AddHbaseConnectList();
+        AddCenterWrapper();
+
     }
 
     /**
@@ -30,16 +28,16 @@ public class HbaseFrame extends JFrame {
      * 添加工具栏
      */
     public void AddHbaseTool() {
-        HbaseToolWrapper hbaseToolWrapper = new HbaseToolWrapper();
-        add(hbaseToolWrapper, BorderLayout.NORTH);
+        ToolWrapper toolWrapper = new ToolWrapper();
+        add(toolWrapper, BorderLayout.NORTH);
     }
 
     /**
      * 添加连接列表
      */
-    public void AddHbaseConnectList() {
-        HbaseConnectTree hbaseConnectTree = new HbaseConnectTree();
-        add(hbaseConnectTree, BorderLayout.WEST);
+    public void AddCenterWrapper() {
+        CenterWrapper centerWrapper = new CenterWrapper();
+        add(centerWrapper, BorderLayout.CENTER);
     }
 
     public static void main(String[] args) {

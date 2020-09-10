@@ -1,4 +1,4 @@
-package MenuPackage;
+package ToolComponent;
 
 import javax.swing.*;
 
@@ -41,12 +41,5 @@ public class HbaseMenu extends JMenuBar {
         add(toolMenu);
         add(windowMenu);
         add(helpMenu);
-    }
-}
-
-
-class CustomMenu extends JMenu {
-    public CustomMenu() {
-
     }
 }

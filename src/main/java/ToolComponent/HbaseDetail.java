@@ -1,4 +1,4 @@
-package HbaseDetailPackage;
+package ToolComponent;
 
 import javax.swing.*;
 
