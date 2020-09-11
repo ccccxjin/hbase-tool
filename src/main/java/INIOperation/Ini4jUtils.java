@@ -5,7 +5,6 @@ import org.ini4j.Profile;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -33,17 +32,12 @@ public class Ini4jUtils {
 
     public static void readIniFile(File iniFile, Map<String, List<String>> fileContent) throws IOException,
             NoSuchFieldException, IllegalAccessException {
-        Ini4jFileVo fileVo = new Ini4jFileVo();
         Ini ini = new Ini();
         ini.load(iniFile);
         Profile.Section section = null;
-        Field field = null;
         for (String key : ini.keySet()) {
             section = ini.get(key);
-            System.out.println(
-                    "zookeeper: " + section.get("zookeeper") + " master: " + section.get("master")
-            );
-
+            System.out.println("zookeeper: " + section.get("zookeeper") + " master: " + section.get("master"));
         }
     }
 
@@ -79,6 +73,7 @@ public class Ini4jUtils {
             fileContent.put("ldap", Arrays.asList("ip", "ipPort"));
             fileContent.put("test", Arrays.asList("isUsed"));
             Ini4jUtils.readIniFile(file, fileContent);
+
         } catch (Exception exception) {
             exception.printStackTrace();
         }
