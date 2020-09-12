@@ -19,16 +19,28 @@ public class HbaseTool extends JPanel {
         JButton jbtUser = new CustomJButton("连接");
         SetButtonStyle(jbtUser, "/image/4.gif");
 
-        JButton queryTable = new CustomJButton("查询");
-        SetButtonStyle(queryTable, "/image/5.gif");
+        JButton jbtQuery = new CustomJButton("查询");
+        SetButtonStyle(jbtQuery, "/image/5.gif");
+
+        JButton jbtDelete = new CustomJButton("删除连接");
+        SetButtonStyle(jbtDelete, "/image/1.gif");
+
+        jbtConnect.addActionListener(e -> {
+            ConnectOperationPopup.ConnectPopup();
+        });
+
+        jbtDelete.addActionListener(e -> {
+            ConnectOperationPopup.deletePopup();
+        });
 
         add(jbtConnect);
         add(jbtUser);
-        add(queryTable);
+        add(jbtQuery);
+        add(jbtDelete);
     }
 
     public void SetButtonStyle(JButton jButton, String url) {
-        jButton.setPreferredSize(new Dimension(70,60));
+        jButton.setPreferredSize(new Dimension(70, 60));
         jButton.setContentAreaFilled(false);
         jButton.setHorizontalTextPosition(JButton.CENTER);
         jButton.setVerticalTextPosition(JButton.BOTTOM);
@@ -36,4 +48,5 @@ public class HbaseTool extends JPanel {
         imgConnect.setImage(imgConnect.getImage().getScaledInstance(35, 35, Image.SCALE_DEFAULT));
         jButton.setIcon(imgConnect);
     }
+
 }

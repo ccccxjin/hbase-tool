@@ -7,9 +7,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+
 public class ConfigUtil {
 
     private final File file = new File(getClass().getResource("/config/connections.ini").getPath());
+
 
     /**
      * 读取配置文件
@@ -34,4 +36,24 @@ public class ConfigUtil {
         return res;
     }
 
+    /**
+     * 修改配置文件, 添加连接
+     */
+    public void add(String name, String hbaseZookeeperQuorum, String hbaseMaster) throws IOException {
+        Ini ini = new Ini();
+        ini.load(file);
+        ini.add(name, "hbase.zookeeper.quorum", hbaseZookeeperQuorum);
+        ini.add(name, "hbase.master", hbaseMaster);
+        ini.store(file);
+    }
+
+    /**
+     * 修改配置文件, 删除连接
+     */
+    public void delete(String name) throws IOException{
+        Ini ini = new Ini();
+        ini.load(file);
+        ini.keySet().remove(name);
+        ini.store();
+    }
 }

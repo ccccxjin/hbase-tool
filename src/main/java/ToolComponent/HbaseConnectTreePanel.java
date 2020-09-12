@@ -20,20 +20,34 @@ public class HbaseConnectTreePanel extends JPanel {
 
     public HbaseConnectTreePanel() {
         setLayout(new FlowLayout(FlowLayout.LEFT));
-        HbaseConnectTree connectTree = new HbaseConnectTree();
+        HbaseConnectTree connectTree = ComponentInstance.hbaseConnectTree;
+        connectTree.init();
         add(connectTree);
     }
 }
 
 
+/**
+ * 连接列表
+ */
 class HbaseConnectTree extends JPanel implements ActionListener {
+
+    // 树结构
     private JTree jTree;
 
+    // 树模型
     private DefaultTreeModel treeModel;
 
+    // 根节点
     DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
 
-    public HbaseConnectTree() {
+    // 数据
+    private final HashMap<String, HashMap<String, String>> data = new HashMap<>();
+
+    /**
+     * 初始化函数
+     */
+    public void init() {
         try {
             HashMap<String, HashMap<String, String>> data = new ConfigUtil().read();
             for (String name : data.keySet()) {
@@ -46,7 +60,33 @@ class HbaseConnectTree extends JPanel implements ActionListener {
         jTree = new JTree(treeModel);
         jTree.setRootVisible(false);
         add(jTree);
+
     }
+
+    public JTree getJTree() {
+        return jTree;
+    }
+
+    public DefaultTreeModel getTreeModel() {
+        return treeModel;
+    }
+
+    /**
+     * 增加节点
+     */
+    public void addConnect(String name) {
+        root.add(new DefaultMutableTreeNode(name));
+        treeModel.reload();
+    }
+
+    /**
+     * 删除节点
+     */
+    public void deleteConnect(int index) {
+        root.remove(index);
+        treeModel.reload();
+    }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
