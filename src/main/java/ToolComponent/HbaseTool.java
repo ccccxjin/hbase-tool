@@ -16,6 +16,9 @@ public class HbaseTool extends JPanel {
         JButton jbtConnect = new CustomJButton("新建连接");
         SetButtonStyle(jbtConnect, "/image/2.gif");
 
+        JButton jbtEdit = new CustomJButton("编辑连接");
+        SetButtonStyle(jbtEdit, "/image/3.gif");
+
         JButton jbtUser = new CustomJButton("连接");
         SetButtonStyle(jbtUser, "/image/4.gif");
 
@@ -26,16 +29,21 @@ public class HbaseTool extends JPanel {
         SetButtonStyle(jbtDelete, "/image/1.gif");
 
         jbtConnect.addActionListener(e -> {
-            ConnectOperationPopup.ConnectPopup();
+            ConnectOperationPopup.AddPopup();
         });
 
         jbtDelete.addActionListener(e -> {
             ConnectOperationPopup.deletePopup();
         });
 
-        add(jbtConnect);
+        jbtEdit.addActionListener(e -> {
+            ConnectOperationPopup.EditPopup();
+        });
+
         add(jbtUser);
         add(jbtQuery);
+        add(jbtConnect);
+        add(jbtEdit);
         add(jbtDelete);
     }
 

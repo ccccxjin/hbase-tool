@@ -15,11 +15,18 @@ public class ConfigUtil {
 
     /**
      * 读取配置文件
-     * @return  HashMap<String, HashMap<String, String>>
+     *
+     * @return HashMap<String, HashMap < String, String>>
      */
-    public HashMap<String, HashMap<String, String>> read() throws IOException {
+    public HashMap<String, HashMap<String, String>> read() {
         Ini ini = new Ini();
-        ini.load(file);
+
+        try {
+            ini.load(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         Profile.Section section;
         HashMap<String, HashMap<String, String>> res = new HashMap<>();
         for (String key : ini.keySet()) {
@@ -37,23 +44,70 @@ public class ConfigUtil {
     }
 
     /**
+     * 读取配置文件, 某一项
+     */
+    public HashMap<String, String> get(String name) {
+        Ini ini = new Ini();
+        try {
+            ini.load(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Profile.Section section = ini.get(name);
+        return new HashMap<String, String>() {
+            {
+                put("name", section.getName());
+                put("hbase.zookeeper.quorum", section.get("hbase.zookeeper.quorum"));
+                put("hbase.master", section.get("hbase.master"));
+            }
+        };
+    }
+
+    /**
      * 修改配置文件, 添加连接
      */
-    public void add(String name, String hbaseZookeeperQuorum, String hbaseMaster) throws IOException {
-        Ini ini = new Ini();
-        ini.load(file);
-        ini.add(name, "hbase.zookeeper.quorum", hbaseZookeeperQuorum);
-        ini.add(name, "hbase.master", hbaseMaster);
-        ini.store(file);
+    public void add(String name, String hbaseZookeeperQuorum, String hbaseMaster) {
+        try {
+            Ini ini = new Ini();
+            ini.load(file);
+            ini.add(name, "hbase.zookeeper.quorum", hbaseZookeeperQuorum);
+            ini.add(name, "hbase.master", hbaseMaster);
+            ini.store(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
      * 修改配置文件, 删除连接
      */
-    public void delete(String name) throws IOException{
-        Ini ini = new Ini();
-        ini.load(file);
-        ini.keySet().remove(name);
-        ini.store();
+    public void delete(String name) {
+        try {
+            Ini ini = new Ini();
+            ini.load(file);
+            ini.keySet().remove(name);
+            ini.store(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 修改配置文件, 修改连接
+     */
+    public void edit(String name, String name1, String hbaseZookeeperQuorum, String hbaseMaster) {
+        try {
+            Ini ini = new Ini();
+            ini.load(file);
+            ini.remove(name);
+            ini.add(name1, "hbase.zookeeper.quorum", hbaseZookeeperQuorum);
+            ini.add(name1, "hbase.master", hbaseMaster);
+            ini.store(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

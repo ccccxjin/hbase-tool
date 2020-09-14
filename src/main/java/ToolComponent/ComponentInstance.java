@@ -2,8 +2,11 @@ package ToolComponent;
 
 public class ComponentInstance {
 
-    // 连接列表树结构, 后面可以使用树模型
-    public static HbaseConnectTree hbaseConnectTree = new HbaseConnectTree();
+    // 连接列表树 - 视图
+    public static HbaseConnectTreeView hbaseConnectTreeView = new HbaseConnectTreeView();
+
+    // 链接列表树 - 模型
+    public static HbaseConnectTreeModel hbaseConnectTreeModel = new HbaseConnectTreeModel();
 
 }
 
