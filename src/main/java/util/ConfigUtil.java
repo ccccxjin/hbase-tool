@@ -31,10 +31,12 @@ public class ConfigUtil {
         HashMap<String, HashMap<String, String>> res = new HashMap<>();
         for (String key : ini.keySet()) {
             section = ini.get(key);
+            String name = section.getName();
             String hbaseZookeeperQuorum = section.get("hbase.zookeeper.quorum");
             String hbaseMaster = section.get("hbase.master");
             res.put(key, new HashMap<String, String>() {
                 {
+                    put("name", name);
                     put("hbase.zookeeper.quorum", hbaseZookeeperQuorum);
                     put("hbase.master", hbaseMaster);
                 }

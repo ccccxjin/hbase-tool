@@ -1,11 +1,15 @@
 package ToolComponent;
 
+import sun.reflect.generics.tree.Tree;
 import util.ConfigUtil;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -17,6 +21,7 @@ public class HbaseConnectTreePanel extends JPanel {
 
     public HbaseConnectTreePanel() {
         setLayout(new FlowLayout(FlowLayout.LEFT));
+        setPreferredSize(new Dimension(180, 0));
 
         HbaseConnectTreeView view = ComponentInstance.hbaseConnectTreeView;
         HbaseConnectTreeModel hbaseConnectTreeModel = ComponentInstance.hbaseConnectTreeModel;
@@ -42,10 +47,14 @@ class HbaseConnectTreeView extends JPanel {
     // 树模型
     private DefaultTreeModel model;
 
-
     // 添加模型
     public void setModel(DefaultTreeModel model) {
         this.model = model;
+    }
+
+    // 获取树结构
+    public JTree getJTree() {
+        return jTree;
     }
 
     // 初始化树结构
@@ -107,26 +116,38 @@ class HbaseConnectTreeModel {
     /**
      * 删除多个节点
      */
-    public void deleteConnects(int[] rows) {
+    public void deleteConnects(int[] rows, ArrayList<String> names) {
         for (int row : rows)
             root.remove(row);
+
+        for (String name : names)
+            cache.remove(name);
+
         model.reload();
     }
 
     /**
      * 编辑节点
      */
-    public void editConnect(int index, String name) {
+    public void editConnect(int index, String name1, String name2, String hbaseZookeeperQuorum, String hbaseMaster) {
         root.remove(index);
-        root.add(new DefaultMutableTreeNode(name));
+        root.add(new DefaultMutableTreeNode(name2));
+        cache.edit(name1, name2, hbaseZookeeperQuorum, hbaseMaster);
         model.reload();
     }
 
     /**
-     * 获取节点
+     * 获取节点参数
      */
-    public DefaultMutableTreeNode getConnect(int index) {
-        return (DefaultMutableTreeNode) root.getChildAt(index);
+    public HashMap<String, String> getConnectInfo(String name) {
+        return cache.get(name);
+    }
+
+    /**
+     * 判断是否有该节点
+     */
+    public boolean containConnect(String name) {
+        return cache.contain(name);
     }
 
 }
@@ -170,6 +191,7 @@ class JTreeCacheStruct {
     public void put(String name, String hbaseZookeeperQuorum, String hbaseMaster) {
         map.put(name, new HashMap<String, String>() {
             {
+                put("name", name);
                 put("hbase.zookeeper.quorum", hbaseZookeeperQuorum);
                 put("hbase.master", hbaseMaster);
             }
@@ -191,6 +213,14 @@ class JTreeCacheStruct {
      */
     public void remove(String name) {
         map.remove(name);
+        new ConfigUtil().delete(name);
+    }
+
+    /**
+     * 判断是否有该连接
+     */
+    public boolean contain(String name) {
+        return map.containsKey(name);
     }
 }
 
