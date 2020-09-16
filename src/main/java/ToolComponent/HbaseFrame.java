@@ -8,11 +8,17 @@ import java.awt.*;
  * 软件界面
  */
 public class HbaseFrame extends JFrame {
+
+    private static HbaseFrame jFrame = null;
+
     public HbaseFrame() {
-        setLayout(new BorderLayout());
-        AddHbaseMenu();
-        AddHbaseTool();
-        AddCenterWrapper();
+        if (jFrame == null) {
+            setLayout(new BorderLayout());
+            AddHbaseMenu();
+            AddHbaseTool();
+            AddCenterWrapper();
+            jFrame = this;
+        }
 
     }
 
@@ -38,6 +44,13 @@ public class HbaseFrame extends JFrame {
     public void AddCenterWrapper() {
         CenterWrapper centerWrapper = new CenterWrapper();
         add(centerWrapper, BorderLayout.CENTER);
+    }
+
+    /**
+     * 获取主界面
+     */
+    public static HbaseFrame getJFrame() {
+        return jFrame;
     }
 
     public static void main(String[] args) {

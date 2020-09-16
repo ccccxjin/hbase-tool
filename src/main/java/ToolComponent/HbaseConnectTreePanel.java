@@ -9,8 +9,11 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 
 
 /**
@@ -150,6 +153,27 @@ class HbaseConnectTreeModel {
         return cache.contain(name);
     }
 
+    /**
+     * 连接hbase, 获取表名
+     * @return: 成功, 返回true, 失败, 返回false
+     */
+    public boolean connect(int index, String name) {
+        try {
+            HashMap<String, String> connectInfo = cache.get(name);
+            String hbaseZookeeperQuorum = connectInfo.get("hbase.zookeeper.quorum");
+            String hbaseMaster = connectInfo.get("hbase.master");
+            ComponentInstance.hbaseUtil.addCon(name, hbaseZookeeperQuorum, hbaseMaster);
+            ArrayList<String> names = ComponentInstance.hbaseUtil.getTableName(name);
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) root.getChildAt(index);
+            for (String o : names) {
+                node.add(new DefaultMutableTreeNode(o));
+            }
+            model.reload();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
 }
 
 

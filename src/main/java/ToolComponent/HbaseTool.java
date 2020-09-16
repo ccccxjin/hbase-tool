@@ -13,14 +13,14 @@ public class HbaseTool extends JPanel {
     public HbaseTool() {
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
 
-        JButton jbtConnect = new CustomJButton("新建连接");
-        SetButtonStyle(jbtConnect, "/image/2.gif");
+        JButton jbtAdd = new CustomJButton("新建连接");
+        SetButtonStyle(jbtAdd, "/image/2.gif");
 
         JButton jbtEdit = new CustomJButton("编辑连接");
         SetButtonStyle(jbtEdit, "/image/3.gif");
 
-        JButton jbtUser = new CustomJButton("连接");
-        SetButtonStyle(jbtUser, "/image/4.gif");
+        JButton jbtConnect = new CustomJButton("连接");
+        SetButtonStyle(jbtConnect, "/image/4.gif");
 
         JButton jbtQuery = new CustomJButton("查询");
         SetButtonStyle(jbtQuery, "/image/5.gif");
@@ -28,21 +28,19 @@ public class HbaseTool extends JPanel {
         JButton jbtDelete = new CustomJButton("删除连接");
         SetButtonStyle(jbtDelete, "/image/1.gif");
 
-        jbtConnect.addActionListener(e -> {
-            ConnectOperationPopup.AddPopup();
-        });
+        jbtAdd.addActionListener(e -> ConnectOperationPopup.AddPopup());
 
-        jbtDelete.addActionListener(e -> {
-            ConnectOperationPopup.deletePopup();
-        });
+        jbtDelete.addActionListener(e -> ConnectOperationPopup.deletePopup());
 
-        jbtEdit.addActionListener(e -> {
-            ConnectOperationPopup.EditPopup();
-        });
+        jbtEdit.addActionListener(e -> ConnectOperationPopup.EditPopup());
 
-        add(jbtUser);
-        add(jbtQuery);
+        jbtConnect.addActionListener(e ->
+                ConnectOperationPopup.connectPopupWrapper()
+        );
+
         add(jbtConnect);
+        add(jbtQuery);
+        add(jbtAdd);
         add(jbtEdit);
         add(jbtDelete);
     }

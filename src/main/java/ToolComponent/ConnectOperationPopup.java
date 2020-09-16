@@ -4,15 +4,22 @@ import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class ConnectOperationPopup {
+
+    private static final JFrame jFrame = new JFrame();
+    private static final Lock lock = new ReentrantLock();
+    private static final Condition condition = lock.newCondition();
+    private static boolean connectStatus;
+
     /**
      * 新建连接
      */
     public static void AddPopup() {
-
-        JFrame jFrame = new JFrame();
         JPanel jPanel = new JPanel();
         jPanel.setLayout(null);
 
@@ -28,7 +35,7 @@ public class ConnectOperationPopup {
         JTextField textField3 = new JTextField(16);
 
         JButton jButton1 = new JButton("新建");
-        JButton jButton2 = new JButton("测试");
+        JButton jButton2 = new JButton("取消");
 
         jButton1.addActionListener(e -> {
             String name = textField1.getText().trim();
@@ -88,8 +95,6 @@ public class ConnectOperationPopup {
     }
 
     public static void deletePopup() {
-        JFrame jFrame = new JFrame();
-
         int[] rows = ComponentInstance.hbaseConnectTreeView.getJTree().getSelectionRows();
         TreePath[] paths = ComponentInstance.hbaseConnectTreeView.getJTree().getSelectionPaths();
         if (rows != null && rows.length == 0) {
@@ -114,8 +119,6 @@ public class ConnectOperationPopup {
 
 
     public static void EditPopup() {
-        JFrame jFrame = new JFrame();
-
         TreePath[] paths = ComponentInstance.hbaseConnectTreeView.getJTree().getSelectionPaths();
         int[] rows = ComponentInstance.hbaseConnectTreeView.getJTree().getSelectionRows();
 
@@ -148,7 +151,7 @@ public class ConnectOperationPopup {
         JTextField textField3 = new JTextField(data.get("hbase.master"), 16);
 
         JButton jButton1 = new JButton("修改");
-        JButton jButton2 = new JButton("测试");
+        JButton jButton2 = new JButton("取消");
 
         jButton1.addActionListener(e -> {
             String name = textField1.getText().trim();
@@ -204,4 +207,76 @@ public class ConnectOperationPopup {
         dialog.setVisible(true);
     }
 
+    /**
+     * 连接面板
+     */
+    public static void connectPopupView(Thread thread, String connectName) {
+        JButton jButton = new JButton("取消");
+        jButton.addActionListener(e -> {
+            thread.interrupt();
+            jFrame.dispose();
+        });
+
+        JOptionPane.showOptionDialog(
+                jFrame,
+                "正在连接 " + connectName,
+                "正在连接",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                new JButton[]{jButton},
+                null
+        );
+    }
+
+    /**
+     * 连接操作
+     */
+    public static void connectPopupWrapper() {
+
+        TreePath[] paths = ComponentInstance.hbaseConnectTreeView.getJTree().getSelectionPaths();
+        int[] rows = ComponentInstance.hbaseConnectTreeView.getJTree().getSelectionRows();
+
+        if (paths == null || paths.length == 0) {
+            JOptionPane.showMessageDialog(jFrame, "请选择需要连接的对象", "提示", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        if (paths.length > 1) {
+            JOptionPane.showMessageDialog(jFrame, "请选择一个连接", "提示", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String connectName = paths[paths.length - 1].getLastPathComponent().toString();
+        int index = rows[rows.length - 1];
+
+        Thread thread1 = new Thread(() -> {
+            lock.lock();
+            connectStatus = ComponentInstance.hbaseConnectTreeModel.connect(index, connectName);
+            condition.signal();
+            lock.unlock();
+
+        });
+
+        Thread thread2 = new Thread(() -> {
+            lock.lock();
+            connectPopupView(thread1, connectName);
+            try {
+                condition.await();
+                if (connectStatus) {
+                    JOptionPane.showMessageDialog(jFrame, "连接成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(jFrame, "连接失败", "提示", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (InterruptedException e) {
+                thread1.interrupt();
+                JOptionPane.showMessageDialog(jFrame, "连接超时", "提示", JOptionPane.INFORMATION_MESSAGE);
+            }
+            jFrame.dispose();
+            lock.unlock();
+        });
+
+        thread2.start();
+//        thread1.start();
+    }
 }
