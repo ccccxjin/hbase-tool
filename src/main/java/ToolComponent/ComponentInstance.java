@@ -1,6 +1,5 @@
 package ToolComponent;
 
-import util.HbaseUtil;
 
 public class ComponentInstance {
 
@@ -12,10 +11,6 @@ public class ComponentInstance {
 
     // 连接列表树 - 模型
     public static HbaseConnectTreeModel hbaseConnectTreeModel = new HbaseConnectTreeModel();
-
-
-    // Hbase工具包
-    public static HbaseUtil hbaseUtil = new HbaseUtil();
 
 }
 
