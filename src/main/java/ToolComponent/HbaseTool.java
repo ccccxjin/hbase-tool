@@ -1,5 +1,6 @@
 package ToolComponent;
 
+import util.CustomIcon;
 import util.CustomJButton;
 
 import javax.swing.*;
@@ -13,20 +14,24 @@ public class HbaseTool extends JPanel {
     public HbaseTool() {
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
 
-        JButton jbtAdd = new CustomJButton("新建连接");
-        SetButtonStyle(jbtAdd, "/image/2.gif");
+        JButton jbtAdd = new CustomJButton("新建");
+        setButtonStyle(jbtAdd, "/tool/add.png");
 
-        JButton jbtEdit = new CustomJButton("编辑连接");
-        SetButtonStyle(jbtEdit, "/image/3.gif");
+        JButton jbtEdit = new CustomJButton("编辑");
+        setButtonStyle(jbtEdit, "/tool/edit.png");
 
         JButton jbtConnect = new CustomJButton("连接");
-        SetButtonStyle(jbtConnect, "/image/4.gif");
+        setButtonStyle(jbtConnect, "/tool/connect.png");
 
         JButton jbtQuery = new CustomJButton("查询");
-        SetButtonStyle(jbtQuery, "/image/5.gif");
+        setButtonStyle(jbtQuery, "/tool/query.png");
 
-        JButton jbtDelete = new CustomJButton("删除连接");
-        SetButtonStyle(jbtDelete, "/image/1.gif");
+        JButton jbtDelete = new CustomJButton("删除");
+        setButtonStyle(jbtDelete, "/tool/delete.png");
+
+        JButton jbtDisConnect = new CustomJButton("断开");
+        setButtonStyle(jbtDisConnect, "/tool/disConnect.png");
+
 
         jbtAdd.addActionListener(e -> ConnectOperationPopup.AddPopup());
 
@@ -34,25 +39,25 @@ public class HbaseTool extends JPanel {
 
         jbtEdit.addActionListener(e -> ConnectOperationPopup.EditPopup());
 
-        jbtConnect.addActionListener(e ->
-                ConnectOperationPopup.connectPopupWrapper()
-        );
+        jbtConnect.addActionListener(e -> ConnectOperationPopup.connectPopupWrapper());
+
+        jbtDisConnect.addActionListener(e -> ConnectOperationPopup.disConnectPopup());
 
         add(jbtConnect);
         add(jbtQuery);
+        add(jbtDisConnect);
         add(jbtAdd);
         add(jbtEdit);
         add(jbtDelete);
     }
 
-    public void SetButtonStyle(JButton jButton, String url) {
+    public void setButtonStyle(JButton jButton, String url) {
         jButton.setPreferredSize(new Dimension(70, 60));
         jButton.setContentAreaFilled(false);
         jButton.setHorizontalTextPosition(JButton.CENTER);
         jButton.setVerticalTextPosition(JButton.BOTTOM);
-        ImageIcon imgConnect = new ImageIcon(getClass().getResource(url));
-        imgConnect.setImage(imgConnect.getImage().getScaledInstance(35, 35, Image.SCALE_DEFAULT));
-        jButton.setIcon(imgConnect);
+        ImageIcon img = new CustomIcon(getClass().getResource(url), CustomIcon.TOOL_SIZE);
+        jButton.setIcon(img);
     }
 
 }

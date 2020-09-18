@@ -4,7 +4,6 @@ import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -16,6 +15,7 @@ public class ConnectOperationPopup {
     private static final Lock lock = new ReentrantLock();
     private static final Condition condition = lock.newCondition();
     private static boolean connectStatus;
+    private static final HbaseConnectTreeModel hbaseConnectTreeModel = ComponentInstance.hbaseConnectTreeModel;
 
     /**
      * 新建连接
@@ -40,7 +40,7 @@ public class ConnectOperationPopup {
 
         jButton1.addActionListener(e -> {
             String name = textField1.getText().trim();
-            if (ComponentInstance.hbaseConnectTreeModel.containConnect(name)) {
+            if (hbaseConnectTreeModel.containConnect(name)) {
                 JOptionPane.showMessageDialog(jFrame, "该名称的数据库已存在", "提示", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
@@ -57,7 +57,7 @@ public class ConnectOperationPopup {
 
             String hbaseZookeeperQuorum = textField2.getText().trim();
             String hbaseMaster = textField3.getText().trim();
-            ComponentInstance.hbaseConnectTreeModel.addConnect(name, hbaseZookeeperQuorum, hbaseMaster);
+            hbaseConnectTreeModel.addConnect(name, hbaseZookeeperQuorum, hbaseMaster);
             jFrame.dispose();
         });
 
@@ -113,7 +113,7 @@ public class ConnectOperationPopup {
         String connectName = paths[paths.length - 1].getLastPathComponent().toString();
         int index = rows[rows.length - 1];
 
-        HashMap<String, String> data = ComponentInstance.hbaseConnectTreeModel.getConnectInfo(connectName);
+        HashMap<String, String> data = hbaseConnectTreeModel.getConnectInfo(connectName);
         JPanel jPanel = new JPanel();
         jPanel.setLayout(null);
 
@@ -144,14 +144,14 @@ public class ConnectOperationPopup {
                 return;
             }
 
-            if (ComponentInstance.hbaseConnectTreeModel.hasConnected(connectName)) {
+            if (hbaseConnectTreeModel.hasConnected(connectName)) {
                 int res = JOptionPane.showOptionDialog(
                         jFrame, "该数据库已连接, 是否直接关闭?", "编辑数据库",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
                         null, new String[]{"确认", "取消"}, null
                 );
                 if (res == JOptionPane.OK_OPTION) {
-                    ComponentInstance.hbaseConnectTreeModel.disConnect(index, connectName);
+                    hbaseConnectTreeModel.disConnect(index, connectName);
                 } else {
                     return;
                 }
@@ -159,7 +159,7 @@ public class ConnectOperationPopup {
 
             String hbaseZookeeperQuorum = textField2.getText().trim();
             String hbaseMaster = textField3.getText().trim();
-            ComponentInstance.hbaseConnectTreeModel.editConnect(index, connectName, name, hbaseZookeeperQuorum, hbaseMaster);
+            hbaseConnectTreeModel.editConnect(index, connectName, name, hbaseZookeeperQuorum, hbaseMaster);
 
             jFrame.dispose();
         });
@@ -237,7 +237,7 @@ public class ConnectOperationPopup {
 
         String connectName = paths[paths.length - 1].getLastPathComponent().toString();
 
-        if (ComponentInstance.hbaseConnectTreeModel.hasConnected(connectName)) {
+        if (hbaseConnectTreeModel.hasConnected(connectName)) {
             JOptionPane.showMessageDialog(jFrame, "该数据库已连接", "提示", JOptionPane.INFORMATION_MESSAGE);
         }
 
@@ -246,7 +246,7 @@ public class ConnectOperationPopup {
 
         Thread thread1 = new Thread(() -> {
             lock.lock();
-            connectStatus = ComponentInstance.hbaseConnectTreeModel.connect(index, connectName);
+            connectStatus = hbaseConnectTreeModel.connect(index, connectName);
             condition.signal();
             lock.unlock();
         });
@@ -263,7 +263,6 @@ public class ConnectOperationPopup {
                 thread1.interrupt();
                 JOptionPane.showMessageDialog(jFrame, "连接超时", "提示", JOptionPane.INFORMATION_MESSAGE);
             }
-            System.out.println("ok");
             jFrame.dispose();
             lock.unlock();
         });
@@ -299,7 +298,7 @@ public class ConnectOperationPopup {
                 null, new String[]{"确认", "取消"}, null
         );
         if (res == JOptionPane.OK_OPTION) {
-            ComponentInstance.hbaseConnectTreeModel.disConnect(index, connectName);
+            hbaseConnectTreeModel.disConnect(index, connectName);
         }
     }
 
@@ -319,7 +318,7 @@ public class ConnectOperationPopup {
         int removeConfirm = 0;
         for (TreePath path : paths) {
             String name = path.getLastPathComponent().toString();
-            if (removeConfirm == 0 && ComponentInstance.hbaseConnectTreeModel.hasConnected(name)) {
+            if (removeConfirm == 0 && hbaseConnectTreeModel.hasConnected(name)) {
                 int res = JOptionPane.showOptionDialog(
                         jFrame, "选项包含已连接的数据库, 继续删除?", "删除数据库",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
@@ -340,7 +339,7 @@ public class ConnectOperationPopup {
         );
 
         if (res == JOptionPane.OK_OPTION) {
-            ComponentInstance.hbaseConnectTreeModel.deleteConnects(rows, names);
+            hbaseConnectTreeModel.deleteConnects(rows, names);
         }
     }
 }

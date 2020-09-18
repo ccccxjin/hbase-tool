@@ -1,17 +1,16 @@
 package ToolComponent;
 
-import util.ConfigUtil;
-import util.MessageDialogUtil;
-import util.HbaseUtil;
+import util.CustomIcon;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 
 /**
@@ -60,8 +59,95 @@ class HbaseConnectTreeView extends JPanel {
 
     // 初始化树结构
     public void init() {
-        jTree = new JTree(model);
+        jTree = new HbaseConnectTree();
+        jTree.setModel(model);
+        jTree.setCellRenderer(new HbaseConnectTreeCellRenderer());
+
+//        DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) jTree.getCellRenderer();
+//        renderer.setLeafIcon(new ImageIcon(getClass().getResource("/tree/table.png")));
+//        renderer.setOpenIcon(new ImageIcon(getClass().getResource("/tree/downArrow.png")));
+//        renderer.setClosedIcon(new ImageIcon(getClass().getResource("/tree/rightArrow.png")));
+
         jTree.setRootVisible(false);
         add(jTree);
+    }
+}
+
+/**
+ * 连接列表, 视图
+ */
+class HbaseConnectTree extends JTree {
+    public HbaseConnectTree() {
+
+        super();
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (e.getClickCount() == 2) {
+                    TreePath[] paths = ComponentInstance.hbaseConnectTreeView.getJTree().getSelectionPaths();
+
+                    if (paths == null || paths.length == 0) {
+                        JOptionPane.showMessageDialog(new JFrame(), "请选择数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
+                        return;
+                    }
+
+                    if (paths.length > 1) {
+                        JOptionPane.showMessageDialog(new JFrame(), "请选择一个数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
+                        return;
+                    }
+
+                    String connectName = paths[paths.length - 1].getLastPathComponent().toString();
+                    if (ComponentInstance.hbaseConnectTreeModel.hasConnected(connectName)) {
+                        if (isExpanded(paths[paths.length - 1])) {
+                            collapsePath(paths[paths.length - 1]);
+                        } else {
+                            expandPath(paths[paths.length - 1]);
+                        }
+                    } else {
+                        ConnectOperationPopup.connectPopupWrapper();
+                    }
+                }
+            }
+        });
+    }
+}
+
+
+/**
+ * 连接列表, 渲染器
+ */
+class HbaseConnectTreeCellRenderer extends DefaultTreeCellRenderer {
+
+    // 图标
+    private final ImageIcon rightArrow = new CustomIcon(getClass().getResource("/tree/rightArrow.png"), CustomIcon.CONNECT_TREE_SIZE);
+    private final ImageIcon downArrow = new CustomIcon(getClass().getResource("/tree/downArrow.png"), CustomIcon.CONNECT_TREE_SIZE);
+
+    private final ImageIcon db0 = new CustomIcon(getClass().getResource("/tree/db0.png"), CustomIcon.CONNECT_TREE_SIZE);
+    private final ImageIcon db1 = new CustomIcon(getClass().getResource("/tree/db1.png"), CustomIcon.CONNECT_TREE_SIZE);
+
+    private final ImageIcon table0 = new CustomIcon(getClass().getResource("/tree/table0.png"), CustomIcon.CONNECT_TREE_SIZE);
+    private final ImageIcon table1 = new CustomIcon(getClass().getResource("/tree/table1.png"), CustomIcon.CONNECT_TREE_SIZE);
+
+    @Override
+    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+        super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+        setText(value.toString());
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+        int level = node.getLevel();
+
+        setPreferredSize(new Dimension(value.toString().length() * 15, 20));
+
+        if (level == 1) {
+            if (ComponentInstance.hbaseConnectTreeModel.hasConnected(value.toString())) {
+                setIcon(db1);
+            } else {
+                setIcon(db0);
+            }
+        } else if (level == 2) {
+            setIcon(table0);
+        }
+        return this;
     }
 }

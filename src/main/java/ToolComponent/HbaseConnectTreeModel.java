@@ -33,7 +33,9 @@ public class HbaseConnectTreeModel {
         try {
             data = operation.read();
             for (String name : data.keySet()) {
+
                 root.add(new DefaultMutableTreeNode(name));
+
                 model = new DefaultTreeModel(root);
             }
         } catch (Exception e) {
@@ -146,7 +148,10 @@ public class HbaseConnectTreeModel {
      */
     public void disConnect(int index, String name) {
         try {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) root.getChildAt(index);
+            node.removeAllChildren();
             operation.disConnect(name);
+            model.reload();
         } catch (IOException e) {
             MessageDialogUtil.errorInfo("断开失败");
         }
@@ -158,6 +163,7 @@ public class HbaseConnectTreeModel {
     public void destroy() {
         try {
             operation.destroy();
+            model.reload();
         } catch (IOException e) {
             // 记录日志
         }
@@ -202,6 +208,7 @@ class JTreeOperation {
 
     /**
      * 连接hbase
+     * 添加connected
      */
     public void connect(String name) throws IOException {
         HashMap<String, String> connectInfo = cache.get(name);
@@ -214,32 +221,36 @@ class JTreeOperation {
     /**
      * 断开连接
      * 1.hbase断开
-     * 2.cache删除
+     * 2.connected删除
      */
     public void disConnect(String name) throws IOException {
         HbaseUtil.removeCon(name);
-        cache.remove(name);
         connected.remove(name);
     }
 
     /**
      * 删除连接
-     * 1.断开连接
-     * 2.config删除
+     * 1.hbase删除
+     * 2.已连接删除
+     * 3.配置文件删除
+     * 4.缓存删除
      */
     public void removeConnect(String name) throws IOException {
-        disConnect(name);
+        HbaseUtil.removeCon(name);
+        connected.remove(name);
         ConfigUtil.remove(name);
+        cache.remove(name);
     }
 
     /**
      * 修改连接
-     * 1.断开连接
-     * 2.修改连接
+     * 1.删除原连接
+     * 2.缓存添加
+     * 3.配置文件修改
      */
     public void editConnect(String oldName, String newName, String hbaseZookeeperQuorum, String hbaseMaster) throws IOException {
-        disConnect(oldName);
-        add(newName, hbaseZookeeperQuorum, hbaseMaster);
+        removeConnect(oldName);
+        cache.put(newName, hbaseZookeeperQuorum, hbaseMaster);
         ConfigUtil.edit(oldName, newName, hbaseZookeeperQuorum, hbaseMaster);
     }
 
