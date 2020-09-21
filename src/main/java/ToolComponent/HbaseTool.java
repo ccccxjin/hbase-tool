@@ -43,6 +43,8 @@ public class HbaseTool extends JPanel {
 
         jbtDisConnect.addActionListener(e -> ConnectOperationPopup.disConnectPopup());
 
+        jbtQuery.addActionListener(e -> ConnectOperationPopup.queryPopup());
+
         add(jbtConnect);
         add(jbtQuery);
         add(jbtDisConnect);

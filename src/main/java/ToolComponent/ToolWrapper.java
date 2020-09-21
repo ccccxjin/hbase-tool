@@ -1,5 +1,8 @@
 package ToolComponent;
 
+import ToolComponent.ConnectTree.HbaseConnectTreePanel;
+import ToolComponent.DataTable.HbaseDataTablePanel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -29,9 +32,8 @@ class CenterWrapper extends JSplitPane {
 
     public CenterWrapper() {
         HbaseConnectTreePanel hbaseConnectTreePanel = new HbaseConnectTreePanel();
-        HbaseData hbaseData = new HbaseData();
+        HbaseDataTablePanel hbaseDataTablePanel = new HbaseDataTablePanel();
         setLeftComponent(hbaseConnectTreePanel);
-        setRightComponent(hbaseData);
-
+        setRightComponent(hbaseDataTablePanel);
     }
 }
