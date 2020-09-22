@@ -26,6 +26,11 @@ public class HbaseDataTableCards extends JPanel {
         setLayout(new BorderLayout());
         add(titlePanel, BorderLayout.NORTH);
         add(cardPanel, BorderLayout.SOUTH);
+
+        addPage("localhost", "table1");
+        addPage("127.0.0.1", "table2");
+        addPage("127.0.0.1", "table2");
+
     }
 
     // 添加页面
@@ -33,7 +38,6 @@ public class HbaseDataTableCards extends JPanel {
         String name = structTitle(dbName, tableName);
         titlePanel.addTitle(dbName, tableName);
         cardPanel.add(new HbaseDataTableView(), name);
-        repaint();
     }
 
     // title名称构造
