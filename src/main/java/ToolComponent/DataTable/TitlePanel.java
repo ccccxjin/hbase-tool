@@ -1,56 +1,74 @@
 package ToolComponent.DataTable;
 
-import ToolComponent.ComponentInstance;
+import ToolComponent.CenterWrapper;
 import util.CustomIcon;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-public class TitlePanel extends JPanel {
+
+/**
+ * 标题面板
+ */
+public class TitlePanel {
+
+    // 标题面板
+    private static final JPanel titlePanel = new JPanel();
 
     // 滚动面板
-    private final JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-    // 图标
-    private final ImageIcon tableIcon = new CustomIcon(getClass().getResource("/tree/table1.png"), CustomIcon.CONNECT_TREE_SIZE);
+    private static final JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
     // 标题列表
-    private final ArrayList<String> titleList = new ArrayList<>();
+    private static final ArrayList<String> titleList = new ArrayList<>();
 
     // 内部容器
-    private final JPanel innerJPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    private static final JPanel innerJPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
     // 左箭头
-    private final JButton jbtLeft = new JButton(new CustomIcon(getClass().getResource("/table/leftArrow.png"), new int[] {20, 30}));
+    private static final JButton jbtLeft = new JButton(new CustomIcon(TitlePanel.class.getResource("/table/leftArrow.png"), new int[]{20, 30}));
 
     // 右箭头
-    private final JButton jbtRight = new JButton(new CustomIcon(getClass().getResource("/table/rightArrow.png"), new int[] {20, 30}));
+    private static final JButton jbtRight = new JButton(new CustomIcon(TitlePanel.class.getResource("/table/rightArrow.png"), new int[]{20, 30}));
 
-    /**
-     * 构造方法
-     */
-    public TitlePanel() {
-        BoxLayout boxLayout = new BoxLayout(this, BoxLayout.X_AXIS);
-        setLayout(boxLayout);
+    // 箭头是否已经显示
+    private static boolean ARROW_STATUS = false;
+
+    private static final int TITLE_LENGTH = 222;
+
+    static {
+        BoxLayout boxLayout = new BoxLayout(titlePanel, BoxLayout.X_AXIS);
+        titlePanel.setLayout(boxLayout);
+
+
         jbtLeft.setBorder(null);
         jbtRight.setBorder(null);
+
         scrollPane.getViewport().add(innerJPanel);
         scrollPane.setBorder(null);
-        add(scrollPane);
 
-        add(Box.createHorizontalGlue());
+        titlePanel.add(scrollPane);
+        addListener();
+    }
 
-        addComponentListener(new ComponentAdapter() {
+    // 获取 title 面板
+    public static JPanel getTitlePanel() {
+        return titlePanel;
+    }
+
+    // 添加监听
+    private static void addListener() {
+
+        // 监听页面大小
+        titlePanel.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
-                System.out.println(getPreferredSize());
-//                System.out.println(ComponentInstance.hbaseConnectTreePanel.getPreferredSize());
-                if (titleList.size() * 220 > getPreferredSize().width) {
+                if (titlePanel.getPreferredSize().getWidth() > CenterWrapper.getPanel().getRightComponent().getWidth()) {
                     addArrowButton();
                 } else {
                     removeArrowButton();
@@ -58,45 +76,81 @@ public class TitlePanel extends JPanel {
             }
         });
 
+        // 监听左移动
+        jbtLeft.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                int value = scrollPane.getHorizontalScrollBar().getValue();
+                if (value > 0) {
+                    if (Math.min(value, TITLE_LENGTH) == value)
+                        scrollPane.getHorizontalScrollBar().setValue(0);
+                    else
+                        scrollPane.getHorizontalScrollBar().setValue(value - TITLE_LENGTH);
+                }
+            }
+        });
+
+        // 监听右移动
+        jbtRight.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                int value = scrollPane.getHorizontalScrollBar().getValue();
+                double maxValue = titlePanel.getPreferredSize().getWidth() - CenterWrapper.getPanel().getRightComponent().getWidth();
+                if (value <= maxValue) {
+                    if (Math.min(maxValue - value, TITLE_LENGTH) == TITLE_LENGTH)
+                        scrollPane.getHorizontalScrollBar().setValue(value + TITLE_LENGTH);
+                    else
+                        scrollPane.getHorizontalScrollBar().setValue((int) maxValue + 1);
+                }
+            }
+        });
     }
 
     // 移除左右按钮
-    public void removeArrowButton() {
-        remove(jbtLeft);
-        remove(jbtRight);
-        repaint();
+    public static void removeArrowButton() {
+        if (ARROW_STATUS) {
+            titlePanel.remove(jbtLeft);
+            titlePanel.remove(jbtRight);
+            ARROW_STATUS = false;
+        }
     }
 
     // 添加左右按钮
-    public void addArrowButton() {
-        add(jbtLeft, 0);
-        add(jbtRight, -1);
-        repaint();
+    public static void addArrowButton() {
+        if (!ARROW_STATUS) {
+            titlePanel.add(jbtLeft, 0);
+            titlePanel.add(jbtRight, -1);
+            ARROW_STATUS = true;
+        }
     }
 
     // 添加标题
-    public void addTitle(String dbName, String tableName) {
+    public static void addTitle(String dbName, String tableName) {
         String name = structTitle(dbName, tableName);
         titleList.add(name);
-        innerJPanel.add(structJLabel(name));
-        System.out.println(this.getPreferredSize());
-        if (titleList.size() * 220 > this.getPreferredSize().width) {
+        innerJPanel.add(new TitleLabel(name));
+        if (titlePanel.getPreferredSize().getWidth() > CenterWrapper.getPanel().getRightComponent().getWidth()) {
+            addArrowButton();
             addArrowButton();
         }
-        repaint();
     }
 
-    // 标签构造
-    private JLabel structJLabel(String name) {
-        JLabel label = new JLabel(name, tableIcon, SwingConstants.LEFT);
-        label.setBorder(new LineBorder(Color.lightGray, 1));
-        label.setPreferredSize(new Dimension(220, 30));
-        return label;
+    // 删除标题
+    public static void removeTitle(TitleLabel titleLabel) {
+        titleList.remove(titleLabel.getLabelName());
+        innerJPanel.remove(titleLabel);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                scrollPane.repaint();
+            }
+        }).start();
     }
 
     // title名称构造
-    private String structTitle(String db, String table) {
+    private static String structTitle(String db, String table) {
         return table + "@" + db;
     }
-
 }

@@ -5,8 +5,8 @@ import javax.swing.*;
 /**
  * 表格, 视图
  */
-public class HbaseDataTableView extends JTable {
-    public HbaseDataTableView() {
+public class TableView extends JTable {
+    public TableView() {
         super();
     }
 }

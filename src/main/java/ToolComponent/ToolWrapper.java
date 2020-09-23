@@ -1,8 +1,5 @@
 package ToolComponent;
 
-import ToolComponent.ConnectTree.HbaseConnectTreePanel;
-import ToolComponent.DataTable.HbaseDataTablePanel;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -10,7 +7,7 @@ import java.awt.*;
  * 工具栏
  * 包装对象
  */
-class ToolWrapper extends JPanel {
+public class ToolWrapper extends JPanel {
     public ToolWrapper() {
         setLayout(new BorderLayout());
 
@@ -24,16 +21,3 @@ class ToolWrapper extends JPanel {
 }
 
 
-/**
- * 连接列表, 数据表格
- * 包装对象
- */
-class CenterWrapper extends JSplitPane {
-
-    public CenterWrapper() {
-        HbaseConnectTreePanel hbaseConnectTreePanel = new HbaseConnectTreePanel();
-        HbaseDataTablePanel hbaseDataTablePanel = new HbaseDataTablePanel();
-        setLeftComponent(hbaseConnectTreePanel);
-        setRightComponent(hbaseDataTablePanel);
-    }
-}

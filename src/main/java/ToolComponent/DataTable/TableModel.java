@@ -5,15 +5,12 @@ import javax.swing.table.DefaultTableModel;
 
 
 /**
- * 数据表格, Model
+ * 表格, Model
  */
-public class HbaseDataTableModel {
+public class TableModel {
     // 表格模型
     private DefaultTableModel model;
 
     // 表格数据
     private String[][] data;
-
-
-
 }

@@ -1,6 +1,5 @@
 package ToolComponent;
 
-import ToolComponent.DataTable.HbaseDataTableCards;
 import util.HbaseWindowListener;
 
 import javax.swing.*;
@@ -20,7 +19,7 @@ public class HbaseFrame extends JFrame {
             AddHbaseMenu();
             AddHbaseTool();
             AddCenterWrapper();
-                jFrame = this;
+            jFrame = this;
     }
 
 }
@@ -42,11 +41,11 @@ public class HbaseFrame extends JFrame {
     }
 
     /**
-     * 添加连接列表
+     * 添加连接列表和数据表格
      */
     public void AddCenterWrapper() {
-        CenterWrapper centerWrapper = new CenterWrapper();
-        add(centerWrapper, BorderLayout.CENTER);
+        JSplitPane splitPane = CenterWrapper.getPanel();
+        add(splitPane, BorderLayout.CENTER);
     }
 
     /**

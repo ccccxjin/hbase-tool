@@ -1,6 +1,5 @@
 package ToolComponent.ConnectTree;
 
-import ToolComponent.ComponentInstance;
 import util.CustomIcon;
 
 import javax.swing.*;
@@ -11,7 +10,7 @@ import java.awt.*;
 /**
  * 连接列表, 渲染器
  */
-class HbaseConnectTreeCellRenderer extends DefaultTreeCellRenderer {
+class TreeCellRenderer extends DefaultTreeCellRenderer {
 
     // 图标
     private final ImageIcon rightArrow = new CustomIcon(getClass().getResource("/tree/rightArrow.png"), CustomIcon.CONNECT_TREE_SIZE);
@@ -34,7 +33,7 @@ class HbaseConnectTreeCellRenderer extends DefaultTreeCellRenderer {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
         int level = node.getLevel();
         if (level == 1) {
-            if (ComponentInstance.hbaseConnectTreeModel.hasConnected(value.toString())) {
+            if (TreeModel.hasConnected(value.toString())) {
                 setIcon(db1);
             } else {
                 setIcon(db0);

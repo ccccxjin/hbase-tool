@@ -1,6 +1,9 @@
 package ToolComponent;
 
-import ToolComponent.ConnectTree.HbaseConnectTreeModel;
+import ToolComponent.ConnectTree.TreeModel;
+import ToolComponent.ConnectTree.TreeView;
+import ToolComponent.DataTable.TableCards;
+import ToolComponent.DataTable.TitlePanel;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -18,7 +21,6 @@ public class ConnectOperationPopup {
     private static final Lock lock = new ReentrantLock();
     private static final Condition condition = lock.newCondition();
     private static boolean connectStatus;
-    private static final HbaseConnectTreeModel hbaseConnectTreeModel = ComponentInstance.hbaseConnectTreeModel;
 
     /**
      * 新建连接
@@ -43,7 +45,7 @@ public class ConnectOperationPopup {
 
         jButton1.addActionListener(e -> {
             String name = textField1.getText().trim();
-            if (hbaseConnectTreeModel.containConnect(name)) {
+            if (TreeModel.containConnect(name)) {
                 JOptionPane.showMessageDialog(jFrame, "该名称的数据库已存在", "提示", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
@@ -60,7 +62,7 @@ public class ConnectOperationPopup {
 
             String hbaseZookeeperQuorum = textField2.getText().trim();
             String hbaseMaster = textField3.getText().trim();
-            hbaseConnectTreeModel.addConnect(name, hbaseZookeeperQuorum, hbaseMaster);
+            TreeModel.addConnect(name, hbaseZookeeperQuorum, hbaseMaster);
             jFrame.dispose();
         });
 
@@ -100,8 +102,8 @@ public class ConnectOperationPopup {
      * 编辑连接
      */
     public static void EditPopup() {
-        TreePath[] paths = ComponentInstance.hbaseConnectTreeControl.getJTree().getSelectionPaths();
-        int[] rows = ComponentInstance.hbaseConnectTreeControl.getJTree().getSelectionRows();
+        TreePath[] paths = TreeView.getJTree().getSelectionPaths();
+        int[] rows = TreeView.getJTree().getSelectionRows();
 
         if (paths == null || paths.length == 0) {
             JOptionPane.showMessageDialog(jFrame, "请选择需要编辑的数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
@@ -120,7 +122,7 @@ public class ConnectOperationPopup {
         String connectName = paths[paths.length - 1].getLastPathComponent().toString();
         int index = rows[rows.length - 1];
 
-        HashMap<String, String> data = hbaseConnectTreeModel.getConnectInfo(connectName);
+        HashMap<String, String> data = TreeModel.getConnectInfo(connectName);
         JPanel jPanel = new JPanel();
         jPanel.setLayout(null);
 
@@ -151,14 +153,14 @@ public class ConnectOperationPopup {
                 return;
             }
 
-            if (hbaseConnectTreeModel.hasConnected(connectName)) {
+            if (TreeModel.hasConnected(connectName)) {
                 int res = JOptionPane.showOptionDialog(
                         jFrame, "该数据库已连接, 是否直接关闭?", "编辑数据库",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
                         null, new String[]{"确认", "取消"}, null
                 );
                 if (res == JOptionPane.OK_OPTION) {
-                    hbaseConnectTreeModel.disConnect(index, connectName);
+                    TreeModel.disConnect(index, connectName);
                 } else {
                     return;
                 }
@@ -166,7 +168,7 @@ public class ConnectOperationPopup {
 
             String hbaseZookeeperQuorum = textField2.getText().trim();
             String hbaseMaster = textField3.getText().trim();
-            hbaseConnectTreeModel.editConnect(index, connectName, name, hbaseZookeeperQuorum, hbaseMaster);
+            TreeModel.editConnect(index, connectName, name, hbaseZookeeperQuorum, hbaseMaster);
 
             jFrame.dispose();
         });
@@ -229,8 +231,8 @@ public class ConnectOperationPopup {
      */
     public static void connectPopupWrapper() {
 
-        TreePath[] paths = ComponentInstance.hbaseConnectTreeControl.getJTree().getSelectionPaths();
-        int[] rows = ComponentInstance.hbaseConnectTreeControl.getJTree().getSelectionRows();
+        TreePath[] paths = TreeView.getJTree().getSelectionPaths();
+        int[] rows = TreeView.getJTree().getSelectionRows();
 
         if (paths == null || paths.length == 0) {
             JOptionPane.showMessageDialog(jFrame, "请选择数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
@@ -249,7 +251,7 @@ public class ConnectOperationPopup {
         TreePath path = paths[paths.length - 1];
         String connectName = path.getLastPathComponent().toString();
 
-        if (hbaseConnectTreeModel.hasConnected(connectName)) {
+        if (TreeModel.hasConnected(connectName)) {
             JOptionPane.showMessageDialog(jFrame, "该数据库已连接", "提示", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
@@ -258,8 +260,8 @@ public class ConnectOperationPopup {
 
         Thread thread1 = new Thread(() -> {
             lock.lock();
-            connectStatus = hbaseConnectTreeModel.connect(index, connectName);
-            ComponentInstance.hbaseConnectTreeControl.getJTree().expandPath(path);
+            connectStatus = TreeModel.connect(index, connectName);
+            TreeView.getJTree().expandPath(path);
             condition.signal();
             lock.unlock();
         });
@@ -292,8 +294,8 @@ public class ConnectOperationPopup {
      * 断开连接
      */
     public static void disConnectPopup() {
-        TreePath[] paths = ComponentInstance.hbaseConnectTreeControl.getJTree().getSelectionPaths();
-        int[] rows = ComponentInstance.hbaseConnectTreeControl.getJTree().getSelectionRows();
+        TreePath[] paths = TreeView.getJTree().getSelectionPaths();
+        int[] rows = TreeView.getJTree().getSelectionRows();
 
         if (paths == null || paths.length == 0) {
             JOptionPane.showMessageDialog(jFrame, "请选择需要断开的数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
@@ -319,8 +321,8 @@ public class ConnectOperationPopup {
                 null, new String[]{"确认", "取消"}, null
         );
         if (res == JOptionPane.OK_OPTION) {
-            hbaseConnectTreeModel.disConnect(index, connectName);
-            ComponentInstance.hbaseConnectTreeControl.getJTree().collapsePath(path);
+            TreeModel.disConnect(index, connectName);
+            TreeView.getJTree().collapsePath(path);
         }
     }
 
@@ -328,8 +330,8 @@ public class ConnectOperationPopup {
      * 删除连接, 判断是否连接
      */
     public static void deletePopup() {
-        int[] rows = ComponentInstance.hbaseConnectTreeControl.getJTree().getSelectionRows();
-        TreePath[] paths = ComponentInstance.hbaseConnectTreeControl.getJTree().getSelectionPaths();
+        int[] rows = TreeView.getJTree().getSelectionRows();
+        TreePath[] paths = TreeView.getJTree().getSelectionPaths();
 
         if (rows != null && rows.length == 0) {
             JOptionPane.showMessageDialog(jFrame, "请选择需要删除的数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
@@ -346,7 +348,7 @@ public class ConnectOperationPopup {
         int removeConfirm = 0;
         for (TreePath path : paths) {
             String name = path.getLastPathComponent().toString();
-            if (removeConfirm == 0 && hbaseConnectTreeModel.hasConnected(name)) {
+            if (removeConfirm == 0 && TreeModel.hasConnected(name)) {
                 int res = JOptionPane.showOptionDialog(
                         jFrame, "选项包含已连接的数据库, 继续删除?", "删除数据库",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
@@ -367,7 +369,7 @@ public class ConnectOperationPopup {
         );
 
         if (res == JOptionPane.OK_OPTION) {
-            hbaseConnectTreeModel.deleteConnects(rows, names);
+            TreeModel.deleteConnects(rows, names);
         }
     }
 
@@ -376,27 +378,31 @@ public class ConnectOperationPopup {
      * 查询
      */
     public static void queryPopup() {
-        int[] rows = ComponentInstance.hbaseConnectTreeControl.getJTree().getSelectionRows();
-        TreePath[] paths = ComponentInstance.hbaseConnectTreeControl.getJTree().getSelectionPaths();
+//        int[] rows = TreeView.getJTree().getSelectionRows();
+//        TreePath[] paths = TreeView.getJTree().getSelectionPaths();
+//
+//        if (rows != null && rows.length == 0) {
+//            JOptionPane.showMessageDialog(jFrame, "请选择需要查询的表", "提示", JOptionPane.INFORMATION_MESSAGE);
+//            return;
+//        }
+//
+//        if (((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getLevel() != 2) {
+//            JOptionPane.showMessageDialog(jFrame, "请选择需要查询的表", "提示", JOptionPane.INFORMATION_MESSAGE);
+//            return;
+//        }
+//
+//        if (paths.length > 1) {
+//            JOptionPane.showMessageDialog(jFrame, "请选择一个数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
+//            return;
+//        }
+//
+//        DefaultMutableTreeNode tableNode = (DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent();
+//        DefaultMutableTreeNode dbNode = (DefaultMutableTreeNode) ((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getParent();
 
-        if (rows != null && rows.length == 0) {
-            JOptionPane.showMessageDialog(jFrame, "请选择需要查询的表", "提示", JOptionPane.INFORMATION_MESSAGE);
-            return;
+//        TableCards.addPage(dbNode.toString(), tableNode.toString());
+
+        for (int i = 0; i < 1; i++) {
+            TitlePanel.addTitle("localhost" + i, "table" + i);
         }
-
-        if (((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getLevel() != 2) {
-            JOptionPane.showMessageDialog(jFrame, "请选择需要查询的表", "提示", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-
-        if (paths.length > 1) {
-            JOptionPane.showMessageDialog(jFrame, "请选择一个数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-
-        DefaultMutableTreeNode tableNode = (DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent();
-        DefaultMutableTreeNode dbNode = (DefaultMutableTreeNode) ((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getParent();
-
-        ComponentInstance.hbaseDataTableCards.addPage(dbNode.toString(), tableNode.toString());
     }
 }
