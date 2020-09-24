@@ -75,12 +75,12 @@ public class TreeModel {
     /**
      * 删除多个connection
      */
-    public static void deleteConnects(int[] rows, ArrayList<String> names) {
+    public static void deleteConnects(ArrayList<DefaultMutableTreeNode> nodes) {
         try {
-            for (int row : rows)
-                root.remove(row);
-            for (String name : names)
-                operation.removeConnect(name);
+            for (DefaultMutableTreeNode node : nodes){
+                root.remove(node);
+                operation.removeConnect(node.toString());
+            }
             model.reload();
         } catch (Exception e) {
             MessageDialogUtil.errorInfo("删除连接失败");
@@ -90,9 +90,9 @@ public class TreeModel {
     /**
      * 编辑connection
      */
-    public static void editConnect(int index, String name1, String name2, String hbaseZookeeperQuorum, String hbaseMaster) {
+    public static void editConnect(DefaultMutableTreeNode node, String name1, String name2, String hbaseZookeeperQuorum, String hbaseMaster) {
         try {
-            root.remove(index);
+            root.remove(node);
             root.add(new DefaultMutableTreeNode(name2));
             operation.editConnect(name1, name2, hbaseZookeeperQuorum, hbaseMaster);
             model.reload();
@@ -125,13 +125,13 @@ public class TreeModel {
     /**
      * 连接hbase, 获取表名
      */
-    public static boolean connect(int index, String name) {
+    public static boolean connect(DefaultMutableTreeNode node) {
         try {
+            String name = node.toString();
             operation.connect(name);
             ArrayList<String> tableNames = operation.getTableList(name);
-            DefaultMutableTreeNode connectNode = (DefaultMutableTreeNode) root.getChildAt(index);
             for (String tableName : tableNames) {
-                connectNode.add(new DefaultMutableTreeNode(tableName));
+                node.add(new DefaultMutableTreeNode(tableName));
             }
             model.reload();
             return true;
@@ -144,11 +144,10 @@ public class TreeModel {
     /**
      * 断开连接
      */
-    public static void disConnect(int index, String name) {
+    public static void disConnect(DefaultMutableTreeNode node) {
         try {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) root.getChildAt(index);
             node.removeAllChildren();
-            operation.disConnect(name);
+            operation.disConnect(node.toString());
             model.reload();
         } catch (IOException e) {
             MessageDialogUtil.errorInfo("断开失败");

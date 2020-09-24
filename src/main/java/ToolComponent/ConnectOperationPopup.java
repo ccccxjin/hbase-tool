@@ -103,7 +103,6 @@ public class ConnectOperationPopup {
      */
     public static void EditPopup() {
         TreePath[] paths = TreeView.getJTree().getSelectionPaths();
-        int[] rows = TreeView.getJTree().getSelectionRows();
 
         if (paths == null || paths.length == 0) {
             JOptionPane.showMessageDialog(jFrame, "请选择需要编辑的数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
@@ -118,9 +117,8 @@ public class ConnectOperationPopup {
         if (((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getLevel() != 1) {
             return;
         }
-
-        String connectName = paths[paths.length - 1].getLastPathComponent().toString();
-        int index = rows[rows.length - 1];
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent();
+        String connectName = node.toString();
 
         HashMap<String, String> data = TreeModel.getConnectInfo(connectName);
         JPanel jPanel = new JPanel();
@@ -160,7 +158,7 @@ public class ConnectOperationPopup {
                         null, new String[]{"确认", "取消"}, null
                 );
                 if (res == JOptionPane.OK_OPTION) {
-                    TreeModel.disConnect(index, connectName);
+                    TreeModel.disConnect(node);
                 } else {
                     return;
                 }
@@ -168,7 +166,7 @@ public class ConnectOperationPopup {
 
             String hbaseZookeeperQuorum = textField2.getText().trim();
             String hbaseMaster = textField3.getText().trim();
-            TreeModel.editConnect(index, connectName, name, hbaseZookeeperQuorum, hbaseMaster);
+            TreeModel.editConnect(node, connectName, name, hbaseZookeeperQuorum, hbaseMaster);
 
             jFrame.dispose();
         });
@@ -232,7 +230,6 @@ public class ConnectOperationPopup {
     public static void connectPopupWrapper() {
 
         TreePath[] paths = TreeView.getJTree().getSelectionPaths();
-        int[] rows = TreeView.getJTree().getSelectionRows();
 
         if (paths == null || paths.length == 0) {
             JOptionPane.showMessageDialog(jFrame, "请选择数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
@@ -249,18 +246,17 @@ public class ConnectOperationPopup {
         }
 
         TreePath path = paths[paths.length - 1];
-        String connectName = path.getLastPathComponent().toString();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+        String connectName = node.toString();
 
         if (TreeModel.hasConnected(connectName)) {
             JOptionPane.showMessageDialog(jFrame, "该数据库已连接", "提示", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
-        int index = rows[rows.length - 1];
-
         Thread thread1 = new Thread(() -> {
             lock.lock();
-            connectStatus = TreeModel.connect(index, connectName);
+            connectStatus = TreeModel.connect(node);
             TreeView.getJTree().expandPath(path);
             condition.signal();
             lock.unlock();
@@ -295,7 +291,6 @@ public class ConnectOperationPopup {
      */
     public static void disConnectPopup() {
         TreePath[] paths = TreeView.getJTree().getSelectionPaths();
-        int[] rows = TreeView.getJTree().getSelectionRows();
 
         if (paths == null || paths.length == 0) {
             JOptionPane.showMessageDialog(jFrame, "请选择需要断开的数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
@@ -312,8 +307,7 @@ public class ConnectOperationPopup {
         }
 
         TreePath path = paths[paths.length - 1];
-        String connectName = path.getLastPathComponent().toString();
-        int index = rows[rows.length - 1];
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
 
         int res = JOptionPane.showOptionDialog(
                 jFrame, "确认断开数据库", "断开数据库",
@@ -321,7 +315,7 @@ public class ConnectOperationPopup {
                 null, new String[]{"确认", "取消"}, null
         );
         if (res == JOptionPane.OK_OPTION) {
-            TreeModel.disConnect(index, connectName);
+            TreeModel.disConnect(node);
             TreeView.getJTree().collapsePath(path);
         }
     }
@@ -330,10 +324,9 @@ public class ConnectOperationPopup {
      * 删除连接, 判断是否连接
      */
     public static void deletePopup() {
-        int[] rows = TreeView.getJTree().getSelectionRows();
         TreePath[] paths = TreeView.getJTree().getSelectionPaths();
-
-        if (rows != null && rows.length == 0) {
+        ArrayList<DefaultMutableTreeNode> needRemoveNodes = new ArrayList<>();
+        if (paths != null && paths.length == 0) {
             JOptionPane.showMessageDialog(jFrame, "请选择需要删除的数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
@@ -342,12 +335,13 @@ public class ConnectOperationPopup {
             if (((DefaultMutableTreeNode) path.getLastPathComponent()).getLevel() != 1) {
                 return;
             }
+            needRemoveNodes.add((DefaultMutableTreeNode)path.getLastPathComponent());
         }
 
         ArrayList<String> names = new ArrayList<>();
         int removeConfirm = 0;
-        for (TreePath path : paths) {
-            String name = path.getLastPathComponent().toString();
+        for (DefaultMutableTreeNode node : needRemoveNodes) {
+            String name = node.toString();
             if (removeConfirm == 0 && TreeModel.hasConnected(name)) {
                 int res = JOptionPane.showOptionDialog(
                         jFrame, "选项包含已连接的数据库, 继续删除?", "删除数据库",
@@ -369,7 +363,8 @@ public class ConnectOperationPopup {
         );
 
         if (res == JOptionPane.OK_OPTION) {
-            TreeModel.deleteConnects(rows, names);
+
+            TreeModel.deleteConnects(needRemoveNodes);
         }
     }
 

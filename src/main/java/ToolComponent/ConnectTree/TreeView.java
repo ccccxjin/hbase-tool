@@ -3,6 +3,8 @@ package ToolComponent.ConnectTree;
 import ToolComponent.ConnectOperationPopup;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
@@ -17,21 +19,18 @@ public class TreeView {
     private static final JTree jTree = new JTree();
 
     static {
-
         jTree.setBackground(new Color(238, 238, 238));
         jTree.setCellRenderer(new TreeCellRenderer());
         jTree.setRootVisible(false);
-
         jTree.setModel(TreeModel.getModel());
 
         // 双击监听
         jTree.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
+                System.out.println(e.getClickCount());
                 if (e.getClickCount() == 2) {
                     TreePath[] paths = jTree.getSelectionPaths();
-                    int[] rows = jTree.getSelectionRows();
 
                     if (paths == null || paths.length == 0) {
                         JOptionPane.showMessageDialog(new JFrame(), "请选择数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
@@ -49,18 +48,11 @@ public class TreeView {
                         return;
                     }
 
-                    if (TreeModel.hasConnected(connectName)) {
-                        if (jTree.isExpanded(paths[paths.length - 1])) {
-                            jTree.collapsePath(paths[paths.length - 1]);
-                        } else {
-                            jTree.expandPath(paths[paths.length - 1]);
-                        }
-                    } else {
+                    if (!TreeModel.hasConnected(connectName))
                         ConnectOperationPopup.connectPopupWrapper();
                     }
                 }
-            }
-        });
+            });
     }
 
     public static JTree getJTree() {

@@ -14,9 +14,9 @@ public class CenterWrapper{
     private static final JSplitPane splitPane = new JSplitPane();
 
     static {
-        JPanel hbaseConnectTreePanel = TreePanel.getPanel();
+        JSplitPane treePanel = TreePanel.getPanel();
         JPanel dataTablePanel = DataTablePanel.getPanel();
-        splitPane.setLeftComponent(hbaseConnectTreePanel);
+        splitPane.setLeftComponent(treePanel);
         splitPane.setRightComponent(dataTablePanel);
     }
 

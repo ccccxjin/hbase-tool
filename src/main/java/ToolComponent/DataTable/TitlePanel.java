@@ -141,12 +141,7 @@ public class TitlePanel {
     public static void removeTitle(TitleLabel titleLabel) {
         titleList.remove(titleLabel.getLabelName());
         innerJPanel.remove(titleLabel);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                scrollPane.repaint();
-            }
-        }).start();
+        scrollPane.repaint();
     }
 
     // title名称构造

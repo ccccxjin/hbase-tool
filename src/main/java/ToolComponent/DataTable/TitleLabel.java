@@ -66,14 +66,13 @@ public class TitleLabel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                setBackground(selectedColor);
-                IS_Select = true;
-                TitleLabel oldSelectedTitle = PUBLIC_SELECTED[0];
-                if (oldSelectedTitle != null){
-                    oldSelectedTitle.setBackground(notSelectedColor);
-                    oldSelectedTitle.IS_Select = false;
+                if (!IS_Select) {
+                    setBackground(selectedColor);
+                    IS_Select = true;
+                    processUnSelected();
+                    PUBLIC_SELECTED[0] = (TitleLabel)e.getComponent();
+                    PUBLIC_SELECTED[0].repaint();
                 }
-                PUBLIC_SELECTED[0] = (TitleLabel)e.getComponent();
             }
         });
 
@@ -81,7 +80,11 @@ public class TitleLabel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                TitlePanel.removeTitle((TitleLabel)e.getComponent().getParent());
+                TitleLabel titleLabel = (TitleLabel)e.getComponent().getParent();
+                if (titleLabel.isIS_Select()) {
+                    titleLabel.processUnSelected();
+                }
+                TitlePanel.removeTitle(titleLabel);
             }
 
             public void mouseEntered(MouseEvent e) {
@@ -92,7 +95,20 @@ public class TitleLabel extends JPanel {
         });
     }
 
+    private void processUnSelected() {
+        TitleLabel oldSelectedTitle = PUBLIC_SELECTED[0];
+        if (oldSelectedTitle != null){
+            oldSelectedTitle.setBackground(notSelectedColor);
+            oldSelectedTitle.IS_Select = false;
+            PUBLIC_SELECTED[0] = null;
+        }
+    }
+
     public String getLabelName() {
         return name;
+    }
+
+    public boolean isIS_Select() {
+        return IS_Select;
     }
 }
