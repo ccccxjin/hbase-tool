@@ -14,10 +14,8 @@ public class CenterWrapper{
     private static final JSplitPane splitPane = new JSplitPane();
 
     static {
-        JSplitPane treePanel = TreePanel.getPanel();
-        JPanel dataTablePanel = DataTablePanel.getPanel();
-        splitPane.setLeftComponent(treePanel);
-        splitPane.setRightComponent(dataTablePanel);
+        splitPane.setLeftComponent(TreePanel.getSplitPane());
+        splitPane.setRightComponent(DataTablePanel.getSplitPane());
     }
 
     public static JSplitPane getPanel() {

@@ -1,25 +1,24 @@
 package ToolComponent.DataTable;
 
+import ToolComponent.DataTable.RowTable.RowTablePanel;
 
 import javax.swing.*;
-import java.awt.*;
 
 
 /**
- * 数据面板, 最外部面板
+ * 数据最外侧面板
+ * 分割面板, 左侧 rowPanel, 右侧 columnPanel
  */
 public class DataTablePanel {
 
-    private static final JPanel panel = new JPanel();
+    private static final JSplitPane splitPane = new JSplitPane();
 
-    static  {
-        panel.setLayout(new BorderLayout());
-        panel.add(TitlePanel.getTitlePanel(), BorderLayout.NORTH);
+    static {
+        splitPane.setDividerSize(5);
+        splitPane.setLeftComponent(RowTablePanel.getPanel());
     }
 
-    public static JPanel getPanel() {
-        return panel;
+    public static JSplitPane getSplitPane() {
+        return splitPane;
     }
 }
-
-

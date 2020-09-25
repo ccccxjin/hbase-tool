@@ -2,8 +2,7 @@ package ToolComponent;
 
 import ToolComponent.ConnectTree.TreeModel;
 import ToolComponent.ConnectTree.TreeView;
-import ToolComponent.DataTable.TableCards;
-import ToolComponent.DataTable.TitlePanel;
+import ToolComponent.DataTable.RowTable.TitlePanel;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;

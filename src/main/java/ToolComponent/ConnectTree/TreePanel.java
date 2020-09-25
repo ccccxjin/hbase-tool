@@ -24,7 +24,7 @@ public class TreePanel {
         splitPane.setBottomComponent(bottomPanel);
     }
 
-    public static JSplitPane getPanel() {
+    public static JSplitPane getSplitPane() {
         return splitPane;
     }
 }

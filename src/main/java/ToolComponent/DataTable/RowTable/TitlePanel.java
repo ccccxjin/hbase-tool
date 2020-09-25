@@ -1,4 +1,4 @@
-package ToolComponent.DataTable;
+package ToolComponent.DataTable.RowTable;
 
 import ToolComponent.CenterWrapper;
 import util.CustomIcon;
@@ -44,7 +44,6 @@ public class TitlePanel {
         BoxLayout boxLayout = new BoxLayout(titlePanel, BoxLayout.X_AXIS);
         titlePanel.setLayout(boxLayout);
 
-
         jbtLeft.setBorder(null);
         jbtRight.setBorder(null);
 
@@ -68,7 +67,7 @@ public class TitlePanel {
             @Override
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
-                if (titlePanel.getPreferredSize().getWidth() > CenterWrapper.getPanel().getRightComponent().getWidth()) {
+                if (titlePanel.getPreferredSize().getWidth() > RowTablePanel.getPanel().getWidth()) {
                     addArrowButton();
                 } else {
                     removeArrowButton();
@@ -131,7 +130,7 @@ public class TitlePanel {
         String name = structTitle(dbName, tableName);
         titleList.add(name);
         innerJPanel.add(new TitleLabel(name));
-        if (titlePanel.getPreferredSize().getWidth() > CenterWrapper.getPanel().getRightComponent().getWidth()) {
+        if (titlePanel.getPreferredSize().getWidth() > RowTablePanel.getPanel().getWidth()) {
             addArrowButton();
             addArrowButton();
         }
