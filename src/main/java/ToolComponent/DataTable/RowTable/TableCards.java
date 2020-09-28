@@ -11,10 +11,13 @@ public class TableCards {
     // 卡片面板
     private static final JPanel cardPanel = new JPanel(new CardLayout());
 
-    // 获取卡片面板
+    static {
+        cardPanel.setLayout(new CardLayout());
+        cardPanel.add(new TableView(), "1");
+    }
+
+
     public static JPanel getCardPanel() {
-        cardPanel.add(new TableView());
-        cardPanel.add(new JButton("hello world"));
         return cardPanel;
     }
 

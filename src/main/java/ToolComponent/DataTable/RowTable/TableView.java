@@ -1,12 +1,29 @@
 package ToolComponent.DataTable.RowTable;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import java.awt.*;
 
 /**
  * 表格, 视图
  */
-public class TableView extends JTable {
+public class TableView extends JPanel {
+
+    public static DefaultTableModel model;
+
+    private JTable table;
+
+    private TableCellRenderer render;
+
     public TableView() {
-        super();
+        setLayout(new GridLayout());
+        model = new HbaseTableModel();
+        render = new TableViewRenderer();
+        table = new JTable(model);
+        table.setDefaultRenderer(Object.class, render);
+        setBorder(new LineBorder(Color.RED));
+        add(new JScrollPane(table));
     }
 }

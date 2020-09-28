@@ -21,7 +21,6 @@ public class HbaseFrame extends JFrame {
             AddCenterWrapper();
             jFrame = this;
     }
-
 }
 
     /**
