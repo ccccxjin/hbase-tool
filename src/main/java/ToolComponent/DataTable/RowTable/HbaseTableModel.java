@@ -9,9 +9,9 @@ import javax.swing.table.DefaultTableModel;
 public class HbaseTableModel extends DefaultTableModel {
 
     // 表格数据
-    private static String[][] data = new String[1000][];
+    private static String[][] data = new String[100][];
 
-    private static String[] singleData = {"cf1: 12345688", "'AL': '0000000000000000'," +
+    private static String[] singleData = {"cf1: 12345688", "123456789", "'AL': '0000000000000000'," +
             "    'IH': '130'," +
             "    'Ia': '0.0'," +
             "    'Ib': '0.0'," +
@@ -50,7 +50,7 @@ public class HbaseTableModel extends DefaultTableModel {
             "    'industry_name': '劳动密集型企业'"};
 
     // 表格字段
-    private static String[] columnNames = {"family: col", "cell"};
+    private static String[] columnNames = {"family: col", "timestamp", "cell"};
 
     static {
         for (int i = 0; i < data.length; i++) {

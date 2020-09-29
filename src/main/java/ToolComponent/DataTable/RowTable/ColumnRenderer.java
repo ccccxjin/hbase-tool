@@ -4,8 +4,8 @@ import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
-public class TableViewRenderer extends JTextArea implements TableCellRenderer {
-    public TableViewRenderer() {
+public class ColumnRenderer extends JTextArea implements TableCellRenderer {
+    public ColumnRenderer() {
         setLineWrap(true);
     }
 
@@ -16,8 +16,13 @@ public class TableViewRenderer extends JTextArea implements TableCellRenderer {
             setText("");
         } else {
             setText(value.toString());
-
-            table.setRowHeight(row, value.toString().length() / 10);
+            int width = table.getColumnModel().getColumn(column).getWidth();
+            int length = value.toString().length();
+            int font = table.getFont().getSize();
+            int height = (length * (font - 1) / width) * (font - 1);
+            if (height > table.getRowHeight()) {
+                table.setRowHeight(row, height);
+            }
         }
         return this;
     }
