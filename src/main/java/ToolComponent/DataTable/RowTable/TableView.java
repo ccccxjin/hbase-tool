@@ -20,10 +20,10 @@ public class TableView extends JPanel {
     public TableView() {
         setLayout(new GridLayout());
         model = new HbaseTableModel();
-        render = new ColumnRenderer();
+        render = new FamilyColumnRenderer();
         table = new JTable(model);
-        table.getColumnModel().getColumn(2).setCellRenderer(new ColumnRenderer());
-        table.setDefaultRenderer(Object.class, render);
+        table.getColumnModel().getColumn(2).setCellRenderer(new FamilyColumnRenderer());
+        table.getColumnModel().getColumn(1).setCellRenderer(new VersionRenderer());
         setBorder(new LineBorder(Color.RED));
         add(new JScrollPane(table));
     }

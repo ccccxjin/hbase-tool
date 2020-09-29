@@ -4,16 +4,15 @@ import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
-public class ColumnRenderer extends JTextArea implements TableCellRenderer {
-    public ColumnRenderer() {
+public class FamilyColumnRenderer extends JTextArea implements TableCellRenderer {
+    public FamilyColumnRenderer() {
         setLineWrap(true);
     }
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        setText(value == null ? "" : value.toString());
         if (value == null) {
-            setText("");
+            setText(null);
         } else {
             setText(value.toString());
             int width = table.getColumnModel().getColumn(column).getWidth();

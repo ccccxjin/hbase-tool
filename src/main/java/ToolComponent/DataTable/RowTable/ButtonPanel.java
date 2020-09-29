@@ -35,6 +35,8 @@ public class ButtonPanel {
     private static final JButton jbtSearch = new JButton("查找");
     private static final JButton jbtFilter = new JButton("过滤");
 
+    //
+
 
 
     static {
