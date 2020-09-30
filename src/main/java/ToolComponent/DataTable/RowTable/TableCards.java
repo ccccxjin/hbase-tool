@@ -13,7 +13,6 @@ public class TableCards {
 
     static {
         cardPanel.setLayout(new CardLayout());
-        cardPanel.add(new TableView(), "1");
     }
 
 
@@ -21,4 +20,13 @@ public class TableCards {
         return cardPanel;
     }
 
+    public static void addPage(String dbName, String tableName) {
+        String name = structPageName(dbName, tableName);
+        cardPanel.add(new TableView(), name);
+        cardPanel.repaint();
+    }
+
+    private static String structPageName(String db, String table) {
+        return table + "@" + db;
+    }
 }

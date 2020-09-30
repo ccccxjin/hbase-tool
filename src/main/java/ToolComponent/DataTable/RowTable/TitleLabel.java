@@ -44,6 +44,8 @@ public class TitleLabel extends JPanel {
         jButton.setPreferredSize(new Dimension(20, 18));
         jButton.setVisible(false);
 
+        processSelect(this);
+
         add(label);
         add(jButton);
 
@@ -66,13 +68,7 @@ public class TitleLabel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                if (!IS_Select) {
-                    setBackground(selectedColor);
-                    IS_Select = true;
-                    processUnSelected();
-                    PUBLIC_SELECTED[0] = (TitleLabel)e.getComponent();
-                    PUBLIC_SELECTED[0].repaint();
-                }
+                processSelect((TitleLabel)e.getComponent());
             }
         });
 
@@ -93,6 +89,16 @@ public class TitleLabel extends JPanel {
                 setBackground(selectedColor);
             }
         });
+    }
+
+    private void processSelect(TitleLabel titleLabel) {
+        if (!IS_Select) {
+            setBackground(selectedColor);
+            IS_Select = true;
+            processUnSelected();
+            PUBLIC_SELECTED[0] = titleLabel;
+            PUBLIC_SELECTED[0].repaint();
+        }
     }
 
     private void processUnSelected() {

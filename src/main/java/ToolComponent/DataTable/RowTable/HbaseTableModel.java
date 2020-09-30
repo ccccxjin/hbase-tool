@@ -59,6 +59,6 @@ public class HbaseTableModel extends DefaultTableModel {
     }
 
     HbaseTableModel() {
-        super(data, columnNames);
+        super(columnNames, 0);
     }
 }

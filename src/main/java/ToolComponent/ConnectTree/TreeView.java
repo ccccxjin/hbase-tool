@@ -28,7 +28,6 @@ public class TreeView {
         jTree.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println(e.getClickCount());
                 if (e.getClickCount() == 2) {
                     TreePath[] paths = jTree.getSelectionPaths();
 
@@ -42,17 +41,18 @@ public class TreeView {
                         return;
                     }
 
-                    String connectName = paths[paths.length - 1].getLastPathComponent().toString();
+                    int level = ((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getLevel();
 
-                    if (((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getLevel() != 1) {
-                        return;
-                    }
-
-                    if (!TreeModel.hasConnected(connectName))
-                        ConnectOperationPopup.connectPopupWrapper();
+                    if (level == 1) {
+                        String connectName = paths[paths.length - 1].getLastPathComponent().toString();
+                        if (!TreeModel.hasConnected(connectName))
+                            ConnectOperationPopup.connectPopupWrapper();
+                    } else if (level == 2) {
+                        ConnectOperationPopup.queryPopup();
                     }
                 }
-            });
+            }
+        });
     }
 
     public static JTree getJTree() {

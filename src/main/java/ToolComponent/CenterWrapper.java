@@ -17,6 +17,7 @@ public class CenterWrapper{
         splitPane.setDividerSize(5);
         splitPane.setLeftComponent(TreePanel.getSplitPane());
         splitPane.setRightComponent(DataTablePanel.getSplitPane());
+        splitPane.setDividerLocation(0.15);
     }
 
     public static JSplitPane getPanel() {

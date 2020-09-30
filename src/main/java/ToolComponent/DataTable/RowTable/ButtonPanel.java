@@ -10,12 +10,7 @@ import java.awt.*;
 public class ButtonPanel {
 
     // 全局面板
-    private static final JPanel panel = new JPanel(new BorderLayout(0, 5));
-
-    // 分层按钮面板
-    private static final Box box1 = Box.createHorizontalBox();
-    private static final Box box2 = Box.createHorizontalBox();
-    private static final Box box3 = Box.createHorizontalBox();
+    private static final JPanel panel = new JPanel();
 
     // label组件
     private static final JLabel rowLabel = new JLabel("row");
@@ -35,39 +30,58 @@ public class ButtonPanel {
     private static final JButton jbtSearch = new JButton("查找");
     private static final JButton jbtFilter = new JButton("过滤");
 
-    //
+    // 纵坐标
+    private static final int FIRST_ROW_Y = 10;
+    private static final int SECOND_ROW_Y = 50;
+    private static final int THIRD_ROW_Y = 90;
 
+    // 组件大小
+    private static final int LABEL_WIDTH = 60;
+    private static final int LABEL_HEIGHT = 25;
+    private static final int TEXT_WIDTH = 140;
+    private static final int TEXT_HEIGHT = 25;
 
+    // 组件间隔
+    private static final int IN_PAIRS = 10;
+    private static final int NOT_IN_PAIRS = 35;
+
+    // 横坐标
+    private static final int FIRST_COL_X = 10;
+    private static final int SECOND_COL_X = FIRST_COL_X + LABEL_WIDTH + IN_PAIRS;
+    private static final int THIRD_COL_X = SECOND_COL_X + TEXT_WIDTH + NOT_IN_PAIRS;
+    private static final int FOURTH_COL_X = THIRD_COL_X + LABEL_WIDTH + IN_PAIRS;
+    private static final int FIFTH_COL_X = FOURTH_COL_X + TEXT_WIDTH + NOT_IN_PAIRS;
+    private static final int SIXTH_COL_X = FIFTH_COL_X + LABEL_WIDTH + IN_PAIRS;
 
     static {
-        panel.setBorder(BorderFactory.createEmptyBorder(7, 2, 7, 2));
-        panel.add(box1, BorderLayout.NORTH);
-        panel.add(box2, BorderLayout.CENTER);
-        panel.add(box3, BorderLayout.SOUTH);
+        panel.setLayout(null);
+        panel.setPreferredSize(new Dimension(0, 150));
+        panel.setBorder(new LineBorder(Color.BLUE));
+        panel.add(rowLabel);
+        panel.add(familyLabel);
+        panel.add(columnLabel);
+        panel.add(rowText);
+        panel.add(familyText);
+        panel.add(columnText);
+        panel.add(minTimeLabel);
+        panel.add(maxTimeLabel);
+        panel.add(minTimeText);
+        panel.add(maxTimeText);
+        panel.add(jbtSearch);
 
-        box1.add(rowLabel);
-        box1.add(Box.createHorizontalStrut(5));
-        box1.add(rowText);
-        box1.add(Box.createHorizontalStrut(28));
-        box1.add(familyLabel);
-        box1.add(Box.createHorizontalStrut(5));
-        box1.add(familyText);
-        box1.add(Box.createHorizontalStrut(28));
-        box1.add(columnLabel);
-        box1.add(Box.createHorizontalStrut(5));
-        box1.add(columnText);
+        rowLabel.setBounds(FIRST_COL_X, FIRST_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
+        rowText.setBounds(SECOND_COL_X, FIRST_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
+        familyLabel.setBounds(THIRD_COL_X, FIRST_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
+        familyText.setBounds(FOURTH_COL_X, FIRST_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
+        columnLabel.setBounds(FIFTH_COL_X, FIRST_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
+        columnText.setBounds(SIXTH_COL_X, FIRST_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
 
-        box2.add(minTimeLabel);
-        box2.add(Box.createHorizontalStrut(5));
-        box2.add(minTimeText);
-        box2.add(Box.createHorizontalStrut(28));
-        box2.add(maxTimeLabel);
-        box2.add(Box.createHorizontalStrut(5));
-        box2.add(maxTimeText);
-        box2.add(jbtSearch);
+        minTimeLabel.setBounds(FIRST_COL_X, SECOND_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
+        minTimeText.setBounds(SECOND_COL_X, SECOND_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
+        maxTimeLabel.setBounds(THIRD_COL_X, SECOND_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
+        maxTimeText.setBounds(FOURTH_COL_X, SECOND_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
 
-        minTimeText.setText("this is minTime");
-        maxTimeText.setText("this is maxTime");
+        jbtSearch.setBounds(SECOND_COL_X, THIRD_ROW_Y, 60, 25);
     }
 
     public static JPanel getPanel() {

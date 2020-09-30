@@ -19,11 +19,14 @@ public class TableView extends JPanel {
 
     public TableView() {
         setLayout(new GridLayout());
+
         model = new HbaseTableModel();
-        render = new FamilyColumnRenderer();
         table = new JTable(model);
+
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
         table.getColumnModel().getColumn(2).setCellRenderer(new FamilyColumnRenderer());
         table.getColumnModel().getColumn(1).setCellRenderer(new VersionRenderer());
+
         setBorder(new LineBorder(Color.RED));
         add(new JScrollPane(table));
     }

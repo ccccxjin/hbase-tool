@@ -18,6 +18,7 @@ public class RowTablePanel {
         northPanel.add(ButtonPanel.getPanel(), BorderLayout.SOUTH);
         panel.add(northPanel, BorderLayout.NORTH);
         panel.add(TableCards.getCardPanel(), BorderLayout.CENTER);
+        panel.add(new PageFooter(), BorderLayout.SOUTH);
     }
 
     public static JPanel getPanel() {

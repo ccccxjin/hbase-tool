@@ -2,6 +2,8 @@ package ToolComponent;
 
 import ToolComponent.ConnectTree.TreeModel;
 import ToolComponent.ConnectTree.TreeView;
+import ToolComponent.DataTable.RowTable.TableCards;
+import ToolComponent.DataTable.RowTable.TitleLabel;
 import ToolComponent.DataTable.RowTable.TitlePanel;
 
 import javax.swing.*;
@@ -372,31 +374,29 @@ public class ConnectOperationPopup {
      * 查询
      */
     public static void queryPopup() {
-//        int[] rows = TreeView.getJTree().getSelectionRows();
-//        TreePath[] paths = TreeView.getJTree().getSelectionPaths();
-//
-//        if (rows != null && rows.length == 0) {
-//            JOptionPane.showMessageDialog(jFrame, "请选择需要查询的表", "提示", JOptionPane.INFORMATION_MESSAGE);
-//            return;
-//        }
-//
-//        if (((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getLevel() != 2) {
-//            JOptionPane.showMessageDialog(jFrame, "请选择需要查询的表", "提示", JOptionPane.INFORMATION_MESSAGE);
-//            return;
-//        }
-//
-//        if (paths.length > 1) {
-//            JOptionPane.showMessageDialog(jFrame, "请选择一个数据库", "提示", JOptionPane.INFORMATION_MESSAGE);
-//            return;
-//        }
-//
-//        DefaultMutableTreeNode tableNode = (DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent();
-//        DefaultMutableTreeNode dbNode = (DefaultMutableTreeNode) ((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getParent();
+        int[] rows = TreeView.getJTree().getSelectionRows();
+        TreePath[] paths = TreeView.getJTree().getSelectionPaths();
 
-//        TableCards.addPage(dbNode.toString(), tableNode.toString());
-
-        for (int i = 0; i < 1; i++) {
-            TitlePanel.addTitle("localhost" + i, "table" + i);
+        if (rows != null && rows.length == 0) {
+            JOptionPane.showMessageDialog(jFrame, "请选择需要查询的表", "提示", JOptionPane.INFORMATION_MESSAGE);
+            return;
         }
+
+        if (((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getLevel() != 2) {
+            JOptionPane.showMessageDialog(jFrame, "请选择需要查询的表", "提示", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        if (paths.length > 1) {
+            JOptionPane.showMessageDialog(jFrame, "请选择一张表", "提示", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        DefaultMutableTreeNode tableNode = (DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent();
+        DefaultMutableTreeNode dbNode = (DefaultMutableTreeNode) ((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getParent();
+
+        TitlePanel.addTitle(dbNode.toString(), tableNode.toString());
+        TitlePanel.rightMove();
+        TitlePanel.rightMove();
     }
 }

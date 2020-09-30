@@ -73,7 +73,6 @@ public class DateTimePicker extends JXDatePicker {
         Date date = getDate();
         if (date != null) {
             Date time = (Date) timeSpinner.getValue();
-            System.out.println(time);
 
             GregorianCalendar timeCalendar = new GregorianCalendar();
             timeCalendar.setTime(time);

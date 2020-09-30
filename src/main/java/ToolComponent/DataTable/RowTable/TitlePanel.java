@@ -21,7 +21,7 @@ public class TitlePanel {
     private static final JPanel titlePanel = new JPanel();
 
     // 滚动面板
-    private static final JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    private static final JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
     // 标题列表
     private static final ArrayList<String> titleList = new ArrayList<>();
@@ -72,6 +72,7 @@ public class TitlePanel {
                 } else {
                     removeArrowButton();
                 }
+                titlePanel.updateUI();
             }
         });
 
@@ -86,6 +87,7 @@ public class TitlePanel {
                         scrollPane.getHorizontalScrollBar().setValue(0);
                     else
                         scrollPane.getHorizontalScrollBar().setValue(value - TITLE_LENGTH);
+                    scrollPane.updateUI();
                 }
             }
         });
@@ -96,12 +98,13 @@ public class TitlePanel {
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 int value = scrollPane.getHorizontalScrollBar().getValue();
-                double maxValue = titlePanel.getPreferredSize().getWidth() - CenterWrapper.getPanel().getRightComponent().getWidth();
+                double maxValue = titlePanel.getPreferredSize().getWidth() - ((JSplitPane) (CenterWrapper.getPanel().getRightComponent())).getLeftComponent().getWidth();
                 if (value <= maxValue) {
                     if (Math.min(maxValue - value, TITLE_LENGTH) == TITLE_LENGTH)
                         scrollPane.getHorizontalScrollBar().setValue(value + TITLE_LENGTH);
                     else
                         scrollPane.getHorizontalScrollBar().setValue((int) maxValue + 1);
+                    scrollPane.updateUI();
                 }
             }
         });
@@ -128,19 +131,37 @@ public class TitlePanel {
     // 添加标题
     public static void addTitle(String dbName, String tableName) {
         String name = structTitle(dbName, tableName);
-        titleList.add(name);
-        innerJPanel.add(new TitleLabel(name));
-        if (titlePanel.getPreferredSize().getWidth() > RowTablePanel.getPanel().getWidth()) {
-            addArrowButton();
-            addArrowButton();
+        if (!titleList.contains(name)) {
+            titleList.add(name);
+            TitleLabel newTitleLabel = new TitleLabel(name);
+            innerJPanel.add(newTitleLabel);
+            if (titlePanel.getPreferredSize().getWidth() > RowTablePanel.getPanel().getWidth()) {
+                addArrowButton();
+                addArrowButton();
+            }
+            titlePanel.updateUI();
+
+            scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getMaximum());
         }
     }
 
     // 删除标题
     public static void removeTitle(TitleLabel titleLabel) {
-        titleList.remove(titleLabel.getLabelName());
-        innerJPanel.remove(titleLabel);
-        scrollPane.repaint();
+        if (titleList.contains(titleLabel.getLabelName())) {
+            titleList.remove(titleLabel.getLabelName());
+            innerJPanel.remove(titleLabel);
+            if (titlePanel.getPreferredSize().getWidth() <= RowTablePanel.getPanel().getWidth()) {
+                removeArrowButton();
+                removeArrowButton();
+            }
+            titlePanel.updateUI();
+        }
+    }
+
+    // 右侧移动, 外部控制
+    public static void rightMove() {
+//        innerJPanel.updateUI();
+//        scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getMaximum());
     }
 
     // title名称构造
