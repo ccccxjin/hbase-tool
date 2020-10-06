@@ -1,5 +1,6 @@
 package ToolComponent.DataTable.RowTable;
 
+import util.CollectionTools;
 import util.CustomIcon;
 
 import javax.swing.*;
@@ -28,15 +29,20 @@ public class TitleLabel extends JPanel {
     private JLabel label;
     private JButton jButton;
     private String name;
+    private String dbName;
+    private String tableName;
+
+    // 是否可用, 对于该类的所有组件
+    private static final boolean IS_AVAILABLE = true;
 
     private boolean IS_Select = false;
 
-    public TitleLabel(String name) {
-        this.name = name;
+    {
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         setPreferredSize(new Dimension(TITLE_LENGTH, 30));
         setBorder(new LineBorder(Color.lightGray, 1));
-        label = new JLabel(name, tableIcon, SwingConstants.LEFT);
+
+        label = new JLabel("", tableIcon, SwingConstants.LEFT);
         label.setPreferredSize(new Dimension(200, 30));
         jButton = new JButton(closeIcon);
         jButton.setBorder(null);
@@ -48,49 +54,69 @@ public class TitleLabel extends JPanel {
 
         add(label);
         add(jButton);
+    }
 
+    public TitleLabel(String dbName, String tableName) {
+        this.dbName = dbName;
+        this.tableName = tableName;
+        this.name = CollectionTools.structTitle(dbName, tableName);
+        label.setName(name);
+
+        // 标签 - 鼠标事件
         addMouseListener(new MouseAdapter() {
+
+            // 鼠标进入, 显示关闭图标, 修改颜色
             @Override
             public void mouseEntered(MouseEvent e) {
-                super.mouseMoved(e);
                 jButton.setVisible(true);
                 setBackground(selectedColor);
             }
 
+            // 鼠标退出, 隐藏关闭图标, 如果未选中, 修改颜色
             @Override
             public void mouseExited(MouseEvent e) {
-                super.mouseExited(e);
                 jButton.setVisible(false);
                 if (!IS_Select)
                     setBackground(notSelectedColor);
             }
 
+            // 鼠标点击, 处理选中事件, 跳转卡片页面
             @Override
             public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
                 processSelect((TitleLabel)e.getComponent());
+                TableCards.jumpPage(dbName, tableName);
             }
         });
 
+        // 关闭按钮 - 鼠标事件
         jButton.addMouseListener(new MouseAdapter() {
+
+            // 处理未选中事件, 删除标题, 删除卡片页面
             @Override
             public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
                 TitleLabel titleLabel = (TitleLabel)e.getComponent().getParent();
                 if (titleLabel.isIS_Select()) {
                     titleLabel.processUnSelected();
                 }
                 TitlePanel.removeTitle(titleLabel);
+                TableCards.removePage(dbName, tableName);
+
             }
 
+            // 鼠标进入, 图标可见, 修改颜色
             public void mouseEntered(MouseEvent e) {
-                super.mouseEntered(e);
                 jButton.setVisible(true);
                 setBackground(selectedColor);
             }
         });
     }
 
+    /**
+     * 处理选择时的操作
+     * 1.修改颜色
+     * 2.修改选中状态
+     * 3.修改旧标签
+     */
     private void processSelect(TitleLabel titleLabel) {
         if (!IS_Select) {
             setBackground(selectedColor);
@@ -101,6 +127,12 @@ public class TitleLabel extends JPanel {
         }
     }
 
+    /**
+     * 选择新标签时, 对旧标签的操作
+     * 1.如果旧标签不为空
+     * 2.修改颜色
+     * 2.修改选中状态
+     */
     private void processUnSelected() {
         TitleLabel oldSelectedTitle = PUBLIC_SELECTED[0];
         if (oldSelectedTitle != null){
@@ -112,6 +144,18 @@ public class TitleLabel extends JPanel {
 
     public String getLabelName() {
         return name;
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public static TitleLabel getSelectedLabel() {
+        return PUBLIC_SELECTED[0];
     }
 
     public boolean isIS_Select() {

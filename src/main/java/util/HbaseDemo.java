@@ -24,8 +24,8 @@ public class HbaseDemo {
      */
     public void init() throws IOException {
         Configuration configuration = HBaseConfiguration.create();
-        configuration.set("hbase.zookeeper.quorum", "192.168.0.23:2181");
-        configuration.set("hbase.master", "192.168.0.21:16010");
+        configuration.set("hbase.zookeeper.quorum", "127.0.0.1:2181");
+        configuration.set("hbase.master", "127.0.0.1:16010");
         connection = ConnectionFactory.createConnection(configuration);
     }
 
@@ -120,15 +120,15 @@ public class HbaseDemo {
     /*
     获取 指定row, 指定列, 指定时间范围, 指定条数的数据数据
      */
-    public void getRowColumnTimeRangeData(String tableName, String row, String family, String column, long minTime, long maxTime) throws IOException {
+    public void getRowColumnTimeRangeData(String tableName, String row) throws IOException {
         Table table = connection.getTable(TableName.valueOf(tableName));
         Get get = new Get(Bytes.toBytes(row));
-        get.addColumn(Bytes.toBytes(family), Bytes.toBytes(column));
-        get.setTimeRange(minTime, maxTime);
-        get.readAllVersions();
-        get.setRowOffsetPerColumnFamily(1);
+//        get.addColumn(Bytes.toBytes(family), Bytes.toBytes(column));
+//        get.setTimeRange(minTime, maxTime);
+//        get.readAllVersions();
+        get.setRowOffsetPerColumnFamily(1000000);
         get.setMaxResultsPerColumnFamily(2);
-        get.readVersions(2);
+//        get.readVersions(2);
         Result result = table.get(get);
         for (Cell cell : result.rawCells()) {
             System.out.println(new String(cell.getValueArray()));
@@ -243,6 +243,15 @@ public class HbaseDemo {
             e.printStackTrace();
         }
     }
+
+    /*
+    获取所有表
+     */
+    public void getAllTableNames() throws IOException {
+        TableName[] tables = connection.getAdmin().listTableNames();
+        for (TableName table : tables)
+            System.out.println(table.getNameAsString());
+    }
 }
 
 
@@ -263,8 +272,8 @@ class TestHbaseDemo {
 //            hbaseDemo.getRowColumnTimeRangeData("test3", "row1", "cf1", " age", 10, 200);
 
 //            hbaseDemo.getRowMultiFamilyData("test3");
-            hbaseDemo.getRowData("darongshuBigData0005", "2018042600025");
-
+//            hbaseDemo.getAllTableNames();
+            hbaseDemo.getRowTimeRangeData("t1", "183800431", 1551424391, 1551424);
             hbaseDemo.close();
 
         } catch (Exception e) {

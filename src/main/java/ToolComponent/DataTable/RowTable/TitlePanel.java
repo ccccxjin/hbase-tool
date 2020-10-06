@@ -2,6 +2,7 @@ package ToolComponent.DataTable.RowTable;
 
 import ToolComponent.CenterWrapper;
 import util.CustomIcon;
+import util.CollectionTools;
 
 import javax.swing.*;
 import java.awt.*;
@@ -130,10 +131,10 @@ public class TitlePanel {
 
     // 添加标题
     public static void addTitle(String dbName, String tableName) {
-        String name = structTitle(dbName, tableName);
+        String name = CollectionTools.structTitle(dbName, tableName);
         if (!titleList.contains(name)) {
             titleList.add(name);
-            TitleLabel newTitleLabel = new TitleLabel(name);
+            TitleLabel newTitleLabel = new TitleLabel(dbName, tableName);
             innerJPanel.add(newTitleLabel);
             if (titlePanel.getPreferredSize().getWidth() > RowTablePanel.getPanel().getWidth()) {
                 addArrowButton();
@@ -156,16 +157,5 @@ public class TitlePanel {
             }
             titlePanel.updateUI();
         }
-    }
-
-    // 右侧移动, 外部控制
-    public static void rightMove() {
-//        innerJPanel.updateUI();
-//        scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getMaximum());
-    }
-
-    // title名称构造
-    private static String structTitle(String db, String table) {
-        return table + "@" + db;
     }
 }

@@ -1,5 +1,7 @@
 package ToolComponent.DataTable.RowTable;
 
+import util.CONSTANT;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
@@ -26,8 +28,17 @@ public class TableView extends JPanel {
         table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
         table.getColumnModel().getColumn(2).setCellRenderer(new FamilyColumnRenderer());
         table.getColumnModel().getColumn(1).setCellRenderer(new VersionRenderer());
-
         setBorder(new LineBorder(Color.RED));
         add(new JScrollPane(table));
+    }
+
+    // 设置表格高度
+    public void setTableRowHeight() {
+        table.getColumnModel().getColumn(2).setCellRenderer(new FamilyColumnRenderer());
+        table.getColumnModel().getColumn(1).setCellRenderer(new VersionRenderer());
+    }
+
+    public DefaultTableModel getModel () {
+        return model;
     }
 }

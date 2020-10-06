@@ -279,7 +279,6 @@ public class ConnectOperationPopup {
             jFrame.dispose();
             lock.unlock();
             jFrame.dispose();
-
         });
 
         thread2.start();
@@ -364,7 +363,6 @@ public class ConnectOperationPopup {
         );
 
         if (res == JOptionPane.OK_OPTION) {
-
             TreeModel.deleteConnects(needRemoveNodes);
         }
     }
@@ -396,7 +394,6 @@ public class ConnectOperationPopup {
         DefaultMutableTreeNode dbNode = (DefaultMutableTreeNode) ((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getParent();
 
         TitlePanel.addTitle(dbNode.toString(), tableNode.toString());
-        TitlePanel.rightMove();
-        TitlePanel.rightMove();
+        TableCards.addPage(dbNode.toString(), tableNode.toString());
     }
 }

@@ -68,6 +68,7 @@ public class HbaseFrame extends JFrame {
         hbaseFrame.setSize(600, 300);
         hbaseFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         hbaseFrame.setVisible(true);
+        hbaseFrame.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
         hbaseFrame.addWindowListener(new HbaseWindowListener());
     }
 }
