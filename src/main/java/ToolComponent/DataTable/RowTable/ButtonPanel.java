@@ -3,6 +3,7 @@ package ToolComponent.DataTable.RowTable;
 import org.apache.commons.lang.StringUtils;
 import util.CONSTANT;
 import util.CollectionTools;
+import util.HbaseNameMap;
 import util.HbaseUtil;
 
 import javax.swing.*;
@@ -21,6 +22,9 @@ public class ButtonPanel extends JPanel {
 
     // 提示界面
     private final JFrame jFrame = new JFrame();
+
+    // 按钮界面map
+    private static final HashMap<String, ButtonPanel> buttonPanelHashMap = new HashMap<>();
 
     // label组件
     private final JLabel rowLabel = new JLabel("row");
@@ -67,6 +71,9 @@ public class ButtonPanel extends JPanel {
     private final int FIFTH_COL_X = FOURTH_COL_X + TEXT_WIDTH + NOT_IN_PAIRS;
     private final int SIXTH_COL_X = FIFTH_COL_X + LABEL_WIDTH + IN_PAIRS;
     private final int SEVENTH_COL_X = SIXTH_COL_X + TEXT_WIDTH + NOT_IN_PAIRS;
+
+    // 名称
+    private String name;
 
     {
         setLayout(null);
@@ -118,52 +125,59 @@ public class ButtonPanel extends JPanel {
         jbtSearch.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (rowText.getText() != null) {
-                    String dbName = TitleLabel.getSelectedLabel().getDbName();
-                    String tableName = TitleLabel.getSelectedLabel().getTableName();
-                    HashMap<String, Object> queryInfo = getQueryInfo();
-                    String row = (String) queryInfo.get("row");
-                    String family = (String) queryInfo.get("family");
-                    String column = (String) queryInfo.get("column");
-                    String minTime = (String) queryInfo.get("minTime");
-                    String maxTime = (String) queryInfo.get("maxTime");
-                    int pageSize = Integer.parseInt((String)queryInfo.get("pageSize"));
-                    boolean isCacheMode = (boolean) queryInfo.get("isCacheMode");
-                    boolean isMilliSecondMode = (boolean) queryInfo.get("isMilliSecondMode");
-                    long minStamp = 0;
-                    long maxStamp = 0;
-                    String[][] data;
-                    try {
-                        if (!minTime.equals("") && !StringUtils.isNumeric(minTime)){
-                            minStamp = CollectionTools.dateToStamp(minTime);
-                            if (!isMilliSecondMode) minStamp = minStamp / 1000;
-                        }
+                new Thread(() -> {
+                    HbaseTableView.clear(name);
+                    enableComponent(false);
+                    if (rowText.getText() != null) {
+                        HashMap<String, Object> queryInfo = getQueryInfo();
+                        String row = (String) queryInfo.get("row");
+                        String family = (String) queryInfo.get("family");
+                        String column = (String) queryInfo.get("column");
+                        String minTime = (String) queryInfo.get("minTime");
+                        String maxTime = (String) queryInfo.get("maxTime");
+                        int pageSize = Integer.parseInt((String)queryInfo.get("pageSize"));
+                        boolean isCacheMode = (boolean) queryInfo.get("isCacheMode");
+                        boolean isMilliSecondMode = (boolean) queryInfo.get("isMilliSecondMode");
+                        long minStamp = 0;
+                        long maxStamp = 0;
+                        String[][] data;
+                        try {
+                            if (!minTime.equals("") && !StringUtils.isNumeric(minTime)){
+                                minStamp = CollectionTools.dateToStamp(minTime);
+                                if (!isMilliSecondMode) minStamp = minStamp / 1000;
+                            }
 
-                        if (!maxTime.equals("") && !StringUtils.isNumeric(maxTime)){
-                            maxStamp = CollectionTools.dateToStamp(maxTime);
-                            if (!isMilliSecondMode) maxStamp = maxStamp / 1000;
-                        }
+                            if (!maxTime.equals("") && !StringUtils.isNumeric(maxTime)){
+                                maxStamp = CollectionTools.dateToStamp(maxTime);
+                                if (!isMilliSecondMode) maxStamp = maxStamp / 1000;
+                            }
 
-                    } catch (ParseException exception) {
-                        JOptionPane.showMessageDialog(jFrame, "时间格式错误", "提示", JOptionPane.INFORMATION_MESSAGE);
-                        return;
+                        } catch (ParseException exception) {
+                            JOptionPane.showMessageDialog(jFrame, "时间格式错误", "提示", JOptionPane.INFORMATION_MESSAGE);
+                            return;
+                        }
+                        try {
+                            String dbName = HbaseNameMap.getConnectionName(name);
+                            String tableName = HbaseNameMap.getTableName(name);
+                            if (isCacheMode)
+                                data = HbaseUtil.getRowData(dbName, tableName, row, family, column, minStamp, maxStamp, 0, pageSize);
+                            else
+                                data = HbaseUtil.getRowData(dbName, tableName, row, family, column, minStamp, maxStamp, 0, 0);
+                        } catch (IOException exception) {
+                            JOptionPane.showMessageDialog(jFrame, "时间格式错误", "提示", JOptionPane.INFORMATION_MESSAGE);
+                            return;
+                        }
+                        HbaseTableView.update(name, data, CONSTANT.ROW_TABLE_COLUMNS);
                     }
-                    try {
-                        if (isCacheMode)
-                            data = HbaseUtil.getRowData(dbName, tableName, row, family, column, minStamp, maxStamp, 0, pageSize);
-                        else
-                            data = HbaseUtil.getRowData(dbName, tableName, row, family, column, minStamp, maxStamp, 0, 0);
-                    } catch (IOException exception) {
-                        JOptionPane.showMessageDialog(jFrame, "时间格式错误", "提示", JOptionPane.INFORMATION_MESSAGE);
-                        return;
-                    }
-                    TableCards.getTableView(dbName, tableName).getModel().getDataVector().clear();
-                    TableCards.getTableView(dbName, tableName).getModel().setDataVector(data, CONSTANT.ROW_TABLE_COLUMNS);
-                    TableCards.getTableView(dbName, tableName).repaint();
-                    TableCards.getTableView(dbName, tableName).setTableRowHeight();
-                }
+                    enableComponent(true);
+                }).start();
             }
         });
+    }
+
+    public ButtonPanel(String name) {
+        this.name = name;
+        buttonPanelHashMap.put(name, this);
     }
 
     // 获取表单的信息
@@ -182,6 +196,18 @@ public class ButtonPanel extends JPanel {
         };
     }
 
+    /**
+     * 修改对应组件状态
+     * 1.标签组件
+     * 2.卡片页面组件
+     */
+    public void enableComponent(boolean enable) {
+        TitlePanel.enableComponent(name, enable);
+        TitlePanel.getTitlePanel().updateUI();
+        TableCards.enableComponent(name, enable);
+        TableCards.jumpPage(name);
+    }
+
     // 设置表单信息
     public void setRow(String row) {
         rowText.setText(row);
@@ -195,5 +221,10 @@ public class ButtonPanel extends JPanel {
     // 开发测试方法
     public void setMaxTimeText(String maxTime) {
         maxTimeText.setText(maxTime);
+    }
+
+    // 删除按钮面板
+    public static ButtonPanel remove(String name) {
+        return buttonPanelHashMap.remove(name);
     }
 }

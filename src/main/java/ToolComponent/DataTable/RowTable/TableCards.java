@@ -17,14 +17,11 @@ public class TableCards {
     // 卡片面板
     private static final JPanel cardPanel = new JPanel(cardLayout);
 
-    // 总页面存储
+    // 面板列表
     private static final HashMap<String, JPanel> panelHashMap = new HashMap<>();
 
-    // 分页面存储
-    private static final HashMap<String, ButtonPanel> buttonPanelHashMap = new HashMap<>();
-    private static final HashMap<String, TableView> tableViewHashMap = new HashMap<>();
-    private static final HashMap<String, PageFooter> pageFooterHashMap = new HashMap<>();
 
+    // 获取卡片面板
     public static JPanel getCardPanel() {
         return cardPanel;
     }
@@ -32,33 +29,24 @@ public class TableCards {
     /**
      * 添加页面
      */
-    public static void addPage(String dbName, String tableName) {
+    public static void addPage(String name) {
 
         JPanel panel = new JPanel(new BorderLayout());
 
-        ButtonPanel buttonPanel = new ButtonPanel();
-        TableView tableView = new TableView();
-        PageFooter pageFooter = new PageFooter();
+        ButtonPanel buttonPanel = new ButtonPanel(name);
+        HbaseTableView hbaseTableView = new HbaseTableView(name);
+        PageFooter pageFooter = new PageFooter(name);
 
         panel.add(buttonPanel, BorderLayout.NORTH);
-        panel.add(tableView, BorderLayout.CENTER);
+        panel.add(hbaseTableView, BorderLayout.CENTER);
         panel.add(pageFooter, BorderLayout.SOUTH);
-        String name = CollectionTools.structTitle(dbName, tableName);
-
-        panelHashMap.put(name, panel);
-        buttonPanelHashMap.put(name, buttonPanel);
-        tableViewHashMap.put(name, tableView);
-        pageFooterHashMap.put(name, pageFooter);
 
         cardPanel.add(panel, name);
+        panelHashMap.put(name, panel);
         cardPanel.repaint();
-
-
 
         // 开发测试信息
         buttonPanel.setRow("183800431");
-//        buttonPanel.setMinTimeText("1551424394");
-//        buttonPanel.setMaxTimeText("1551424874");
         buttonPanel.setMinTimeText("2019-03-01 15:13:14");
         buttonPanel.setMaxTimeText("2019-03-01 15:21:14");
     }
@@ -66,47 +54,29 @@ public class TableCards {
     /**
      * 删除页面
      */
-    public static void removePage(String dbName, String tableName) {
-        String name = CollectionTools.structTitle(dbName, tableName);
-        buttonPanelHashMap.remove(name);
-        tableViewHashMap.remove(name);
-        pageFooterHashMap.remove(name);
-
+    public static void removePage(String name) {
+        ButtonPanel.remove(name);
+        HbaseTableView.remove(name);
+        PageFooter.remove(name);
         JPanel panel = panelHashMap.get(name);
-        panelHashMap.remove(name);
-        cardPanel.remove(panel);
+        if (panel != null) {
+            cardPanel.remove(panel);
+        }
         cardPanel.revalidate();
     }
 
     /**
      * 跳转页面
      */
-    public static void jumpPage(String dbName, String tableName) {
-        String name = CollectionTools.structTitle(dbName, tableName);
+    public static void jumpPage(String name) {
         cardLayout.show(cardPanel, name);
     }
 
-    // 获取按钮面板
-    public static ButtonPanel getButtonPanel(String dbName, String tableName) {
-        String name = CollectionTools.structTitle(dbName, tableName);
-        return buttonPanelHashMap.get(name);
-    }
-
-    // 获取表格视图
-    public static TableView getTableView(String dbName, String tableName) {
-        String name = CollectionTools.structTitle(dbName, tableName);
-        return tableViewHashMap.get(name);
-    }
-
-    // 获取底部视图
-    public static PageFooter getPageFooter(String dbName, String tableName) {
-        String name = CollectionTools.structTitle(dbName, tableName);
-        return pageFooterHashMap.get(name);
-    }
-
-    // 获取总页面
-    public static JPanel getPanel(String dbName, String tableName) {
-        String name = CollectionTools.structTitle(dbName, tableName);
-        return panelHashMap.get(name);
+    // 修改页面状态
+    public static void enableComponent(String name, boolean enable) {
+        JPanel panel = panelHashMap.get(name);
+        if (panel != null) {
+            CollectionTools.enableComponents(panel, enable);
+        }
     }
 }

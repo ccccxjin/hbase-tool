@@ -20,6 +20,7 @@ public class TreePanel {
         topPanel.setMinimumSize(new Dimension(200, 200));
         topPanel.getViewport().add(TreeView.getJTree());
         splitPane.setDividerSize(5);
+        splitPane.setDividerLocation(0.35);
         splitPane.setTopComponent(topPanel);
         splitPane.setBottomComponent(bottomPanel);
     }

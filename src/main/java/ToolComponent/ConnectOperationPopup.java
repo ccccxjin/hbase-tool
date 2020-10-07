@@ -5,6 +5,8 @@ import ToolComponent.ConnectTree.TreeView;
 import ToolComponent.DataTable.RowTable.TableCards;
 import ToolComponent.DataTable.RowTable.TitleLabel;
 import ToolComponent.DataTable.RowTable.TitlePanel;
+import util.CollectionTools;
+import util.HbaseNameMap;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -393,7 +395,11 @@ public class ConnectOperationPopup {
         DefaultMutableTreeNode tableNode = (DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent();
         DefaultMutableTreeNode dbNode = (DefaultMutableTreeNode) ((DefaultMutableTreeNode) paths[paths.length - 1].getLastPathComponent()).getParent();
 
-        TitlePanel.addTitle(dbNode.toString(), tableNode.toString());
-        TableCards.addPage(dbNode.toString(), tableNode.toString());
+        String name = CollectionTools.structTitle(dbNode.toString(), tableNode.toString());
+
+        TitlePanel.addTitle(name);
+        TableCards.addPage(name);
+        TableCards.jumpPage(name);
+        HbaseNameMap.put(dbNode.toString(), tableNode.toString());
     }
 }

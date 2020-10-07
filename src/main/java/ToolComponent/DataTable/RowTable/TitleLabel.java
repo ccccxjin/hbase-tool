@@ -1,6 +1,5 @@
 package ToolComponent.DataTable.RowTable;
 
-import util.CollectionTools;
 import util.CustomIcon;
 
 import javax.swing.*;
@@ -11,9 +10,6 @@ import java.awt.event.MouseEvent;
 
 
 public class TitleLabel extends JPanel {
-    // 当前选择的标签, 类变量
-    private static TitleLabel[] PUBLIC_SELECTED = new TitleLabel[1];
-
     // 图标
     private static final ImageIcon tableIcon = new CustomIcon(TitlePanel.class.getResource("/table/table.png"), CustomIcon.CONNECT_TREE_SIZE);
     private static final ImageIcon closeIcon = new CustomIcon(TitlePanel.class.getResource("/table/close.png"), new int[]{10, 10});
@@ -26,15 +22,11 @@ public class TitleLabel extends JPanel {
     private static final int TITLE_LENGTH = 222;
 
     // 组件
-    private JLabel label;
-    private JButton jButton;
-    private String name;
-    private String dbName;
-    private String tableName;
+    private final JLabel label;
+    private final JButton jButton;
+    private final String name;
 
-    // 是否可用, 对于该类的所有组件
-    private static final boolean IS_AVAILABLE = true;
-
+    // 是否已选择
     private boolean IS_Select = false;
 
     {
@@ -42,25 +34,20 @@ public class TitleLabel extends JPanel {
         setPreferredSize(new Dimension(TITLE_LENGTH, 30));
         setBorder(new LineBorder(Color.lightGray, 1));
 
-        label = new JLabel("", tableIcon, SwingConstants.LEFT);
-        label.setPreferredSize(new Dimension(200, 30));
         jButton = new JButton(closeIcon);
         jButton.setBorder(null);
         jButton.setBackground(selectedColor);
         jButton.setPreferredSize(new Dimension(20, 18));
         jButton.setVisible(false);
-
         processSelect(this);
-
-        add(label);
-        add(jButton);
     }
 
-    public TitleLabel(String dbName, String tableName) {
-        this.dbName = dbName;
-        this.tableName = tableName;
-        this.name = CollectionTools.structTitle(dbName, tableName);
-        label.setName(name);
+    public TitleLabel(String name) {
+        this.name = name;
+        label = new JLabel(name, tableIcon, SwingConstants.LEFT);
+        label.setPreferredSize(new Dimension(200, 30));
+        add(label);
+        add(jButton);
 
         // 标签 - 鼠标事件
         addMouseListener(new MouseAdapter() {
@@ -84,7 +71,7 @@ public class TitleLabel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 processSelect((TitleLabel)e.getComponent());
-                TableCards.jumpPage(dbName, tableName);
+                TableCards.jumpPage(name);
             }
         });
 
@@ -95,11 +82,11 @@ public class TitleLabel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 TitleLabel titleLabel = (TitleLabel)e.getComponent().getParent();
-                if (titleLabel.isIS_Select()) {
+                if (titleLabel.IS_Select()) {
                     titleLabel.processUnSelected();
                 }
                 TitlePanel.removeTitle(titleLabel);
-                TableCards.removePage(dbName, tableName);
+                TableCards.removePage(name);
 
             }
 
@@ -122,8 +109,8 @@ public class TitleLabel extends JPanel {
             setBackground(selectedColor);
             IS_Select = true;
             processUnSelected();
-            PUBLIC_SELECTED[0] = titleLabel;
-            PUBLIC_SELECTED[0].repaint();
+            TitlePanel.setSelectedLabel(titleLabel);
+            titleLabel.repaint();
         }
     }
 
@@ -134,31 +121,21 @@ public class TitleLabel extends JPanel {
      * 2.修改选中状态
      */
     private void processUnSelected() {
-        TitleLabel oldSelectedTitle = PUBLIC_SELECTED[0];
+        TitleLabel oldSelectedTitle = TitlePanel.getSelectedLabel();
         if (oldSelectedTitle != null){
             oldSelectedTitle.setBackground(notSelectedColor);
             oldSelectedTitle.IS_Select = false;
-            PUBLIC_SELECTED[0] = null;
+            TitlePanel.setSelectedLabel(null);
         }
     }
 
+    // 获取名称
     public String getLabelName() {
         return name;
     }
 
-    public String getDbName() {
-        return dbName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public static TitleLabel getSelectedLabel() {
-        return PUBLIC_SELECTED[0];
-    }
-
-    public boolean isIS_Select() {
+    // 是否已选择
+    public boolean IS_Select() {
         return IS_Select;
     }
 }

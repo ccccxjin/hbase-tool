@@ -1,8 +1,8 @@
 package ToolComponent.DataTable.RowTable;
 
 import ToolComponent.CenterWrapper;
-import util.CustomIcon;
 import util.CollectionTools;
+import util.CustomIcon;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,34 +11,40 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /**
- * 标题面板
+ * 标签面板
  */
 public class TitlePanel {
 
-    // 标题面板
+    // 标签面板
     private static final JPanel titlePanel = new JPanel();
 
     // 滚动面板
     private static final JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-    // 标题列表
+    // 标签名称列表
     private static final ArrayList<String> titleList = new ArrayList<>();
+
+    // 标签存储map
+    private static final HashMap<String, TitleLabel> titleLabelHashMap = new HashMap<>();
+
+    // 当前已选择的标签
+    private static TitleLabel SELECTED_LABEL;
 
     // 内部容器
     private static final JPanel innerJPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
-    // 左箭头
+    // 箭头
     private static final JButton jbtLeft = new JButton(new CustomIcon(TitlePanel.class.getResource("/table/leftArrow.png"), new int[]{20, 30}));
-
-    // 右箭头
     private static final JButton jbtRight = new JButton(new CustomIcon(TitlePanel.class.getResource("/table/rightArrow.png"), new int[]{20, 30}));
 
     // 箭头是否已经显示
     private static boolean ARROW_STATUS = false;
 
+    // 标签宽度
     private static final int TITLE_LENGTH = 222;
 
     static {
@@ -129,33 +135,57 @@ public class TitlePanel {
         }
     }
 
-    // 添加标题
-    public static void addTitle(String dbName, String tableName) {
-        String name = CollectionTools.structTitle(dbName, tableName);
+    // 添加标签
+    public static void addTitle(String name) {
         if (!titleList.contains(name)) {
             titleList.add(name);
-            TitleLabel newTitleLabel = new TitleLabel(dbName, tableName);
+            TitleLabel newTitleLabel = new TitleLabel(name);
             innerJPanel.add(newTitleLabel);
+            titleLabelHashMap.put(name, newTitleLabel);
             if (titlePanel.getPreferredSize().getWidth() > RowTablePanel.getPanel().getWidth()) {
                 addArrowButton();
                 addArrowButton();
             }
             titlePanel.updateUI();
-
             scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getMaximum());
         }
     }
 
-    // 删除标题
+    // 删除标签
     public static void removeTitle(TitleLabel titleLabel) {
-        if (titleList.contains(titleLabel.getLabelName())) {
-            titleList.remove(titleLabel.getLabelName());
+        String name = titleLabel.getLabelName();
+        if (titleList.contains(name)) {
+            titleList.remove(name);
+            titleLabelHashMap.remove(name);
             innerJPanel.remove(titleLabel);
             if (titlePanel.getPreferredSize().getWidth() <= RowTablePanel.getPanel().getWidth()) {
                 removeArrowButton();
                 removeArrowButton();
             }
             titlePanel.updateUI();
+        }
+    }
+
+    // 获取已选择标签
+    public static TitleLabel getSelectedLabel() {
+        return SELECTED_LABEL;
+    }
+
+    // 修改已选择标签
+    public static void setSelectedLabel(TitleLabel selectedLabel) {
+        SELECTED_LABEL = selectedLabel;
+    }
+
+    // 获取标签
+    public static TitleLabel getTitleLabel(String name) {
+        return titleLabelHashMap.get(name);
+    }
+
+    // 修改标签状态
+    public static void enableComponent(String name, boolean enable) {
+        JPanel panel = titleLabelHashMap.get(name);
+        if (panel != null) {
+            CollectionTools.enableComponents(panel, enable);
         }
     }
 }

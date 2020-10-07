@@ -1,5 +1,6 @@
 package util;
 
+import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,5 +27,16 @@ public class CollectionTools {
         Date date = new Date(s);
         res = simpleDateFormat.format(date);
         return res;
+    }
+
+    // 修改容器下, 所有组件的状态
+    public static void enableComponents(Container container, boolean enable) {
+        Component[] components = container.getComponents();
+        for (Component component : components) {
+            component.setEnabled(enable);
+            if (component instanceof Container) {
+                enableComponents((Container)component, enable);
+            }
+        }
     }
 }
