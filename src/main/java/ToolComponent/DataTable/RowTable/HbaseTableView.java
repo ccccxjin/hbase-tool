@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -42,9 +43,7 @@ public class HbaseTableView extends JPanel {
     // 更新数据并显示 - static
     public static void update(String name, String[][] data, String[] columns) {
         HbaseTableView tableView = tableViewHashMap.get(name);
-        tableView.clear();
         tableView.set(data, columns);
-        tableView.repaint();
         tableView.setTableRowHeight();
     }
 
