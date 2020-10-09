@@ -65,6 +65,12 @@ public class HbaseUtil {
             Connection connection = conMap.get(dbName);
             Table table = connection.getTable(TableName.valueOf(tableName));
             Get get = new Get(Bytes.toBytes(row));
+            /**
+             *
+             */
+
+
+
 
             if (!family.equals("")) {
                 if (!column.equals("")) get.addColumn(Bytes.toBytes(family), Bytes.toBytes(column));

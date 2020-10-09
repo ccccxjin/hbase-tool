@@ -9,6 +9,8 @@ import util.HbaseUtil;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -45,6 +47,7 @@ public class ButtonPanel extends JPanel {
     // 控制组件
     private final JButton jbtSearch = new JButton("查找");
     private final JButton jbtRefresh = new JButton("刷新");
+    private final JButton jbtJump = new JButton("跳转");
     private final JButton jbtNextPage = new JButton("下一页");
     private final JButton jbtPrePage = new JButton("上一页");
     private final JRadioButton jbtCacheMode = new JRadioButton("缓存模式");
@@ -78,17 +81,17 @@ public class ButtonPanel extends JPanel {
     private String name;
 
     // 缓存数据
-    private String[][] data;
+    private String[][] data = new String[][]{};
 
     // 显示数据
-    private String[][] showData;
+    private String[][] showData = new String[][]{};
 
-    // 页数
-    private int page;
+    // hbase查找参数, offset: 开始获取的偏移量, maxSize: 最大返回数
+    private int offset;
+    private int maxSize;
 
-    // 数据范围
+    // table显示参数, minDataRange: 开始显示的数据, maxDataRange: 结束显示的数据
     private int minDataRange;
-    private int maxDataRange;
 
     {
         setLayout(null);
@@ -136,32 +139,38 @@ public class ButtonPanel extends JPanel {
         jbtCacheMode.setBounds(SEVENTH_COL_X, FIRST_ROW_Y, 100, 25);
         jbtMillisecondSecond.setBounds(SEVENTH_COL_X, SECOND_ROW_Y, 100, 25);
 
-        //搜索按钮
+        /*
+         * 搜索按钮
+         * 鼠标左键点击 -> 设置页面为 "1" -> 清空表格
+         * 缓存模式: 不设置获取范围 -> 获取数据 -> 显示数据
+         * 非缓存模式: 设置获取范围 -> 获取数据 -> 显示数据
+         */
         jbtSearch.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new Thread(()->{
-                    page = 1;
-                    preOperation(true, false);
-                    query(e);
-                    postOperation();
-                }).start();
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    new Thread(() -> {
+                        setPage(1);
+                        preOperation(true);
+                        query();
+                        postOperation("无数据");
+                    }).start();
+                }
             }
         });
 
-        // 下一页按钮
-        jbtNextPage.addMouseListener(new MouseAdapter() {
+        // 切换缓存模式
+        jbtCacheMode.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new Thread(() -> {
-                    if (haveNextPage()) {
-                        page = page + 1;
-                        if (jbtCacheMode.isSelected()) preOperation(false, true);
-                        else preOperation(true, false);
-                        query(e);
-                        postOperation();
-                    }
-                }).start();
+                int res = JOptionPane.showOptionDialog(
+                        jFrame, "修改缓存模式, 需要清空当前页面的数据", "修改缓存模式",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                        null, new String[]{"确认", "取消"}, null
+                );
+                if (res == JOptionPane.OK_OPTION) {
+                    init();
+                }
             }
         });
     }
@@ -173,7 +182,7 @@ public class ButtonPanel extends JPanel {
     }
 
     // 查找数据
-    public void query(MouseEvent e) {
+    public void query() {
         if (rowText.getText() != null) {
             String dbName = HbaseNameMap.getConnectionName(name);
             String tableName = HbaseNameMap.getTableName(name);
@@ -184,7 +193,7 @@ public class ButtonPanel extends JPanel {
             long minStamp = timeMap.get("minStamp");
             long maxStamp = timeMap.get("maxStamp");
             try {
-                data = HbaseUtil.getRowData(dbName, tableName, row, family, column, minStamp, maxStamp, minDataRange, maxDataRange);
+                data = HbaseUtil.getRowData(dbName, tableName, row, family, column, minStamp, maxStamp, offset, maxSize);
             } catch (IOException exception) {
                 JOptionPane.showMessageDialog(jFrame, "HBase查询失败", "提示", JOptionPane.INFORMATION_MESSAGE);
                 exception.printStackTrace();
@@ -192,78 +201,98 @@ public class ButtonPanel extends JPanel {
         }
     }
 
-
-    // 获取表单的信息
-    public HashMap<String, Object> getFormData() {
-        return new HashMap<String, Object>() {
-            {
-                put("row", rowText.getText().trim());
-                put("family", familyText.getText().trim());
-                put("column", columnText.getText().trim());
-                put("minTime", minTimeText.getText().trim());
-                put("maxTime", maxTimeText.getText().trim());
-                put("pageSize", PageSizeBox.getSelectedItem());
-                put("isCacheMode", jbtCacheMode.isSelected());
-                put("isMilliSecondMode", jbtMillisecondSecond.isSelected());
-            }
-        };
+    /**
+     * 初始化页面
+     */
+    private void init() {
+        data = new String[][]{};
+        showData = new String[][]{};
+        setPage(1);
+        offset = 0;
+        maxSize = 0;
+        minDataRange = 0;
+        HbaseTableView.update(name, data, CONSTANT.ROW_TABLE_COLUMNS);
     }
 
     /**
      * 查询前操作
      * page: 页数, 不一定是当前的页数
-     * clearCache: 是否清空缓存
-     * careCache: 根据 缓存 计算数据范围
+     * clearTable: 是否清空表格
      */
-    private void preOperation(boolean clearCache, boolean careCache) {
-        HbaseTableView.clear(name);
-        enableComponent(false);
-        if (clearCache) {
-            data = new String[][]{};
-            showData = new String[][]{};
+    private void preOperation(boolean clearTable) {
+        if (clearTable) {
+            HbaseTableView.clear(name);
         }
-
-        minDataRange = (page - 1) * getPageSize();
-        maxDataRange = page * getPageSize();
-
-        if (careCache && (data.length != 0)) {
-            if (maxDataRange > data.length) {
-                maxDataRange = data.length;
-            }
+        enableComponent(false);
+        if (jbtCacheMode.isSelected()) {
+            offset = 0;
+            maxSize = 0;
+        } else {
+            offset = (getGoPage() - 1) * getPageSize();
+            maxSize = getPageSize();
         }
     }
 
-
     /**
-     * 查询后操作
+     * 查询后操作, 主要用于显示数据
+     * 如果数据不为空
+     * 如果是缓存模式, 计算数据方位, 显示数据
+     * 如果是非缓存模式, 直接显示数据
+     * 最后更新页数
+     * 数据为空, 提示框
      */
-    private void postOperation() {
-        if (!jbtCacheMode.isSelected()) {
-            HbaseTableView.update(name, data, CONSTANT.ROW_TABLE_COLUMNS);
+    private void postOperation(String message) {
+        if (data.length != 0) {
+            if (jbtCacheMode.isSelected()) {
+                minDataRange = (getGoPage() - 1) * getPageSize();
+                int length = Math.min(getPageSize(), data.length - minDataRange);
+                showData = new String[length][];
+                System.arraycopy(data, minDataRange, showData, 0, length);
+                HbaseTableView.update(name, showData, CONSTANT.ROW_TABLE_COLUMNS);
+            } else {
+                HbaseTableView.update(name, data, CONSTANT.ROW_TABLE_COLUMNS);
+            }
+            setPage(getGoPage());
         } else {
-            int length = Math.min(maxDataRange - minDataRange, data.length);
-            showData = new String[length][];
-            System.arraycopy(data, minDataRange, showData, 0, length);
-            HbaseTableView.update(name, showData, CONSTANT.ROW_TABLE_COLUMNS);
+            JOptionPane.showMessageDialog(jFrame, message, "提示", JOptionPane.INFORMATION_MESSAGE);
+            setPage(getPage());
         }
         enableComponent(true);
     }
 
     /**
-     * 是否有上一页
+     * 是否有该页, 该方法主要用于判断是否需要开启新线程进行操作
+     * 1. page <= 0, 返回false
+     * 2. 缓存模式时, 数据量不够, 返回false
      */
-    private boolean havePrePage(int page) {
-        return page > 1;
+    private boolean havePage(int page) {
+        if (page <= 0) {
+            return false;
+        }
+        if (jbtCacheMode.isSelected()) {
+            return Math.ceil((double) data.length / (double) getPageSize()) >= page;
+        }
+        return true;
     }
 
-
     /**
-     * 是否有下一页
+     * 跳转页面
      */
-    private boolean haveNextPage() {
-        if (jbtCacheMode.isSelected())
-            return data.length / getPageSize() > page;
-        return true;
+    public static void jump(String name) {
+        buttonPanelHashMap.get(name).jump();
+    }
+
+    private void jump() {
+        if (havePage(getGoPage())) {
+            new Thread(() -> {
+                preOperation(false);
+                if (!jbtCacheMode.isSelected())
+                    query();
+                postOperation("第" + getGoPage() + "页无数据");
+            }).start();
+        } else {
+            JOptionPane.showMessageDialog(jFrame, "第" + getGoPage() + "页无数据");
+        }
     }
 
     // 获取时间戳
@@ -272,7 +301,7 @@ public class ButtonPanel extends JPanel {
         String maxTime = maxTimeText.getText().trim();
         boolean isMilliSecondMode = jbtMillisecondSecond.isSelected();
         try {
-            return new HashMap<String, Long>(){{
+            return new HashMap<String, Long>() {{
                 long minStamp;
                 long maxStamp;
 
@@ -354,5 +383,38 @@ public class ButtonPanel extends JPanel {
     // 获取上一页按钮
     public static JButton getJbtPrePage(String name) {
         return buttonPanelHashMap.get(name).jbtPrePage;
+    }
+
+    // 设置goPage
+    private void setGoPage(int goPage) {
+        PageFooter.setGoPage(name, goPage);
+    }
+
+    // 获取goPage
+    private int getGoPage() {
+        return PageFooter.getGoPage(name);
+    }
+
+    // 设置page
+    private void setPage(int page) {
+        PageFooter.setPage(name, page);
+    }
+
+    // 获取page
+    private int getPage() {
+        return PageFooter.getPage(name);
+    }
+
+    // 获取最后一页的页数, 为了pageFooter的最后一页的操作
+    public static int getLastPage(String name) {
+        return buttonPanelHashMap.get(name).getLastPage();
+    }
+
+    private int getLastPage() {
+        if (jbtCacheMode.isSelected()) {
+            return (int) Math.ceil((double) data.length / (double) getPageSize());
+        } else {
+            return -1;
+        }
     }
 }
