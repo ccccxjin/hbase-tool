@@ -1,35 +1,69 @@
 package ToolComponent.DataTable.RowTable;
 
+import ToolComponent.DataTable.ColumnTable.ColumnButtonPanel;
+import ToolComponent.DataTable.FamilyColumnRenderer;
+import ToolComponent.DataTable.VersionRenderer;
+import org.apache.hadoop.hbase.client.Row;
+import util.CONSTANT;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.ArrayList;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
 /**
  * 表格, 视图
  */
-public class HbaseTableView extends JPanel {
+public class RowTableView extends JPanel {
 
     private final JTable table;
-    public DefaultTableModel model;
+
+    public DefaultTableModel model = new DefaultTableModel(){
+        public boolean isCellEditable(int rot, int column) {
+            return false;
+        }
+    };
 
     private final String name;
 
-    private static final HashMap<String, HbaseTableView> tableViewHashMap = new HashMap<>();
+    private static final HashMap<String, RowTableView> tableViewHashMap = new HashMap<>();
 
     {
         setLayout(new GridLayout());
-        model = new HbaseTableModel();
         table = new JTable(model);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
+        set(new String[][]{}, CONSTANT.ROW_TABLE_COLUMNS);
         setTableRowHeight();
         setBorder(new LineBorder(Color.RED));
         add(new JScrollPane(table));
+
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int index = table.getSelectedRow();
+                    HashMap<String, String> hashMap = RowButtonPanel.getInfo(name, index);
+                    ColumnButtonPanel.init();
+                    ColumnButtonPanel.set(
+                            hashMap.get("dbName"),
+                            hashMap.get("tableName"),
+                            hashMap.get("row"),
+                            hashMap.get("family"),
+                            hashMap.get("column"),
+                            hashMap.get("minTime"),
+                            hashMap.get("maxTime"),
+                            hashMap.get("timestamp"),
+                            hashMap.get("value")
+                    );
+                }
+            }
+        });
     }
 
-    public HbaseTableView(String name) {
+    public RowTableView(String name) {
         this.name = name;
         tableViewHashMap.put(name, this);
     }
@@ -42,7 +76,7 @@ public class HbaseTableView extends JPanel {
 
     // 更新数据并显示 - static
     public static void update(String name, String[][] data, String[] columns) {
-        HbaseTableView tableView = tableViewHashMap.get(name);
+        RowTableView tableView = tableViewHashMap.get(name);
         tableView.clear();
         tableView.set(data, columns);
         tableView.setTableRowHeight();
@@ -50,7 +84,7 @@ public class HbaseTableView extends JPanel {
 
     // 修改数据 - static
     public static void set(String name, String[][] data, String[] columns) {
-        HbaseTableView tableView = tableViewHashMap.get(name);
+        RowTableView tableView = tableViewHashMap.get(name);
         if (tableView != null)
             tableView.set(data, columns);
     }
@@ -62,7 +96,7 @@ public class HbaseTableView extends JPanel {
 
     // 清空数据 - static
     public static void clear(String name) {
-        HbaseTableView tableView = tableViewHashMap.get(name);
+        RowTableView tableView = tableViewHashMap.get(name);
         if (tableView != null)
             tableView.clear();
     }
@@ -74,7 +108,7 @@ public class HbaseTableView extends JPanel {
 
     // 刷新数据 - static
     public static void refresh(String name) {
-        HbaseTableView tableView = tableViewHashMap.get(name);
+        RowTableView tableView = tableViewHashMap.get(name);
         if (tableView != null)
             tableView.refresh();
     }
@@ -89,7 +123,7 @@ public class HbaseTableView extends JPanel {
     }
 
     // 删除表格
-    public static HbaseTableView remove(String name) {
+    public static RowTableView remove(String name) {
         return tableViewHashMap.remove(name);
     }
 }

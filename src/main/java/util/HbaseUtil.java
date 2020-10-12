@@ -59,18 +59,12 @@ public class HbaseUtil {
      * 获取数据
      */
     public static String[][] getRowData(String dbName, String tableName, String row, String family, String column,
-                                  long minTime, long maxTime, int offset, int maxSize) throws IOException {
+                                  long minTime, long maxTime, int offset, int maxSize, int version) throws IOException {
         String[][] data = new String[][]{};
         if (conMap.containsKey(dbName)) {
             Connection connection = conMap.get(dbName);
             Table table = connection.getTable(TableName.valueOf(tableName));
             Get get = new Get(Bytes.toBytes(row));
-            /**
-             *
-             */
-
-
-
 
             if (!family.equals("")) {
                 if (!column.equals("")) get.addColumn(Bytes.toBytes(family), Bytes.toBytes(column));
@@ -79,6 +73,9 @@ public class HbaseUtil {
             if (minTime != 0 && maxTime != 0) get.setTimeRange(minTime, maxTime);
             get.setRowOffsetPerColumnFamily(offset);
             if (maxSize != 0) get.setMaxResultsPerColumnFamily(maxSize);
+
+            if (version > 0) get.readVersions(version);
+            else get.readAllVersions();
 
             Result result = table.get(get);
 
@@ -90,6 +87,7 @@ public class HbaseUtil {
                 data[i] = new String[]{
                         new String(cell.getFamilyArray()),
                         new String(cell.getQualifierArray()),
+                        String.valueOf(cell.getTimestamp()),
                         new String(cell.getValueArray())
                 };
             }

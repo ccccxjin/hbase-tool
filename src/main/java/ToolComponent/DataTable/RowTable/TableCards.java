@@ -33,31 +33,31 @@ public class TableCards {
 
         JPanel panel = new JPanel(new BorderLayout());
 
-        ButtonPanel buttonPanel = new ButtonPanel(name);
-        HbaseTableView hbaseTableView = new HbaseTableView(name);
-        PageFooter pageFooter = new PageFooter(name);
+        RowButtonPanel rowButtonPanel = new RowButtonPanel(name);
+        RowTableView rowTableView = new RowTableView(name);
+        RowPageFooter rowPageFooter = new RowPageFooter(name);
 
-        panel.add(buttonPanel, BorderLayout.NORTH);
-        panel.add(hbaseTableView, BorderLayout.CENTER);
-        panel.add(pageFooter, BorderLayout.SOUTH);
+        panel.add(rowButtonPanel, BorderLayout.NORTH);
+        panel.add(rowTableView, BorderLayout.CENTER);
+        panel.add(rowPageFooter, BorderLayout.SOUTH);
 
         cardPanel.add(panel, name);
         panelHashMap.put(name, panel);
         cardPanel.repaint();
 
         // 开发测试信息
-        buttonPanel.setRow("183800431");
-        buttonPanel.setMinTimeText("2019-03-01 15:13:14");
-        buttonPanel.setMaxTimeText("2019-03-01 15:21:14");
+        rowButtonPanel.setRow("183800431");
+        rowButtonPanel.setMinTimeText("2019-03-01 15:13:14");
+        rowButtonPanel.setMaxTimeText("2019-03-01 15:21:14");
     }
 
     /**
      * 删除页面
      */
     public static void removePage(String name) {
-        ButtonPanel.remove(name);
-        HbaseTableView.remove(name);
-        PageFooter.remove(name);
+        RowButtonPanel.remove(name);
+        RowTableView.remove(name);
+        RowPageFooter.remove(name);
         JPanel panel = panelHashMap.get(name);
         if (panel != null) {
             cardPanel.remove(panel);

@@ -1,6 +1,7 @@
 package ToolComponent.DataTable.RowTable;
 
 import util.CustomIcon;
+import util.HbaseNameMap;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -87,7 +88,7 @@ public class TitleLabel extends JPanel {
                 }
                 TitlePanel.removeTitle(titleLabel);
                 TableCards.removePage(name);
-
+                HbaseNameMap.removeName(name);
             }
 
             // 鼠标进入, 图标可见, 修改颜色

@@ -9,8 +9,6 @@ import util.HbaseUtil;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -20,13 +18,13 @@ import java.util.HashMap;
 /**
  * 按钮操作面板
  */
-public class ButtonPanel extends JPanel {
+public class RowButtonPanel extends JPanel {
 
     // 提示界面
     private final JFrame jFrame = new JFrame();
 
     // 按钮界面map
-    private static final HashMap<String, ButtonPanel> buttonPanelHashMap = new HashMap<>();
+    private static final HashMap<String, RowButtonPanel> buttonPanelHashMap = new HashMap<>();
 
     // label组件
     private final JLabel rowLabel = new JLabel("row");
@@ -47,7 +45,6 @@ public class ButtonPanel extends JPanel {
     // 控制组件
     private final JButton jbtSearch = new JButton("查找");
     private final JButton jbtRefresh = new JButton("刷新");
-    private final JButton jbtJump = new JButton("跳转");
     private final JButton jbtNextPage = new JButton("下一页");
     private final JButton jbtPrePage = new JButton("上一页");
     private final JRadioButton jbtCacheMode = new JRadioButton("缓存模式");
@@ -80,11 +77,14 @@ public class ButtonPanel extends JPanel {
     // 名称
     private String name;
 
-    // 缓存数据
+    // 缓存数据(原始数据)
     private String[][] data = new String[][]{};
 
-    // 显示数据
+    // 显示数据(原始数据)
     private String[][] showData = new String[][]{};
+
+    // 显示数据
+    private String[][] showData1 = new String[][]{};
 
     // hbase查找参数, offset: 开始获取的偏移量, maxSize: 最大返回数
     private int offset;
@@ -176,7 +176,7 @@ public class ButtonPanel extends JPanel {
     }
 
     // 构造方法
-    public ButtonPanel(String name) {
+    public RowButtonPanel(String name) {
         this.name = name;
         buttonPanelHashMap.put(name, this);
     }
@@ -193,7 +193,7 @@ public class ButtonPanel extends JPanel {
             long minStamp = timeMap.get("minStamp");
             long maxStamp = timeMap.get("maxStamp");
             try {
-                data = HbaseUtil.getRowData(dbName, tableName, row, family, column, minStamp, maxStamp, offset, maxSize);
+                data = HbaseUtil.getRowData(dbName, tableName, row, family, column, minStamp, maxStamp, offset, maxSize, 1);
             } catch (IOException exception) {
                 JOptionPane.showMessageDialog(jFrame, "HBase查询失败", "提示", JOptionPane.INFORMATION_MESSAGE);
                 exception.printStackTrace();
@@ -207,11 +207,12 @@ public class ButtonPanel extends JPanel {
     private void init() {
         data = new String[][]{};
         showData = new String[][]{};
+        showData1 = new String[][]{};
         setPage(1);
         offset = 0;
         maxSize = 0;
         minDataRange = 0;
-        HbaseTableView.update(name, data, CONSTANT.ROW_TABLE_COLUMNS);
+        RowTableView.update(name, data, CONSTANT.ROW_TABLE_COLUMNS);
     }
 
     /**
@@ -221,7 +222,7 @@ public class ButtonPanel extends JPanel {
      */
     private void preOperation(boolean clearTable) {
         if (clearTable) {
-            HbaseTableView.clear(name);
+            RowTableView.clear(name);
         }
         enableComponent(false);
         if (jbtCacheMode.isSelected()) {
@@ -248,16 +249,32 @@ public class ButtonPanel extends JPanel {
                 int length = Math.min(getPageSize(), data.length - minDataRange);
                 showData = new String[length][];
                 System.arraycopy(data, minDataRange, showData, 0, length);
-                HbaseTableView.update(name, showData, CONSTANT.ROW_TABLE_COLUMNS);
             } else {
-                HbaseTableView.update(name, data, CONSTANT.ROW_TABLE_COLUMNS);
+                showData = data;
             }
+            parseData();
+            RowTableView.update(name, showData1, CONSTANT.ROW_TABLE_COLUMNS);
             setPage(getGoPage());
         } else {
             JOptionPane.showMessageDialog(jFrame, message, "提示", JOptionPane.INFORMATION_MESSAGE);
             setPage(getPage());
         }
+        RowPageFooter.setDesc(name, getDescribe(name));
         enableComponent(true);
+    }
+
+    /**
+     * 构造数据
+     */
+    private void parseData() {
+        showData1 = new String[showData.length][];
+        for (int i = 0; i < showData.length; i++) {
+            String family = showData[i][0];
+            String column = showData[i][1];
+            String timestamp = showData[i][2];
+            String value = showData[i][3];
+            showData1[i] = new String[]{family + ":" + column, timestamp, value};
+        }
     }
 
     /**
@@ -371,7 +388,7 @@ public class ButtonPanel extends JPanel {
     }
 
     // 删除按钮面板
-    public static ButtonPanel remove(String name) {
+    public static RowButtonPanel remove(String name) {
         return buttonPanelHashMap.remove(name);
     }
 
@@ -387,22 +404,22 @@ public class ButtonPanel extends JPanel {
 
     // 设置goPage
     private void setGoPage(int goPage) {
-        PageFooter.setGoPage(name, goPage);
+        RowPageFooter.setGoPage(name, goPage);
     }
 
     // 获取goPage
     private int getGoPage() {
-        return PageFooter.getGoPage(name);
+        return RowPageFooter.getGoPage(name);
     }
 
     // 设置page
     private void setPage(int page) {
-        PageFooter.setPage(name, page);
+        RowPageFooter.setPage(name, page);
     }
 
     // 获取page
     private int getPage() {
-        return PageFooter.getPage(name);
+        return RowPageFooter.getPage(name);
     }
 
     // 获取最后一页的页数, 为了pageFooter的最后一页的操作
@@ -415,6 +432,42 @@ public class ButtonPanel extends JPanel {
             return (int) Math.ceil((double) data.length / (double) getPageSize());
         } else {
             return -1;
+        }
+    }
+
+    // 获取信息 - static
+    public static HashMap<String, String> getInfo(String name, int index) {
+        return buttonPanelHashMap.get(name).getInfo(index);
+    }
+
+    // 获取信息
+    private HashMap<String, String> getInfo(int index) {
+        String[] cell = showData[index];
+        return new HashMap<String, String>(){
+            {
+                put("dbName", HbaseNameMap.getConnectionName(name));
+                put("tableName", HbaseNameMap.getTableName(name));
+                put("row", rowText.getText().trim());
+                put("family", cell[0]);
+                put("column", cell[1]);
+                put("minTime", minTimeText.getText().trim());
+                put("maxTime", maxTimeText.getText().trim());
+                put("timestamp", cell[2]);
+                put("value", cell[3]);
+            }
+        };
+    }
+
+    public static String getDescribe(String name) {
+        return buttonPanelHashMap.get(name).getDescribe();
+    }
+
+    // 获取描述信息
+    private String getDescribe() {
+        if (jbtCacheMode.isSelected()) {
+            return data.length + "条数据, 分" + data.length / getPageSize() + "页";
+        } else {
+            return data.length + "条数据";
         }
     }
 }

@@ -4,6 +4,7 @@ import util.CustomIcon;
 import util.NumberDocument;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -11,10 +12,19 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
-public class PageFooter extends JPanel {
+public class RowPageFooter extends JPanel {
 
     // 面板
-    private JFrame jFrame = new JFrame();
+    private final JFrame jFrame = new JFrame();
+
+    // 左panel
+    private final JPanel panel1 = new JPanel();
+
+    // 组件
+    private final JLabel jLabel = new JLabel();
+
+    // 右panel
+    private final JPanel panel2 = new JPanel();
 
     // 组件
     private final JButton jbtLast = new JButton(new CustomIcon(getClass().getResource("/table/lastPage.png"), CustomIcon.CONNECT_TREE_SIZE));
@@ -25,7 +35,7 @@ public class PageFooter extends JPanel {
     private final JTextField pageTextField = new JTextField("0", 3);
 
     // 界面map
-    private static final HashMap<String, PageFooter> pageFooterHashMap = new HashMap<>();
+    private static final HashMap<String, RowPageFooter> pageFooterHashMap = new HashMap<>();
 
     // 名称
     private String name;
@@ -36,20 +46,35 @@ public class PageFooter extends JPanel {
     // 刷新前的页数
     private int goPage = 0;
 
+    // 描述语句
+    private String desc = "";
+
     {
-        setLayout(new FlowLayout(FlowLayout.RIGHT, 1, 0));
+
+        setBorder(new LineBorder(Color.green));
+        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         setPreferredSize(new Dimension(0, 25));
+
+        panel1.add(jLabel);
+        panel1.setBorder(new LineBorder(Color.blue));
+        panel1.setPreferredSize(new Dimension(200, 25));
+
+        panel2.setLayout(new FlowLayout(FlowLayout.RIGHT, 1, 0));
+        panel2.setPreferredSize(new Dimension(0, 25));
+        panel1.setBorder(new LineBorder(Color.red));
 
         pageTextField.setDocument(new NumberDocument());
         pageTextField.setHorizontalAlignment(JTextField.CENTER);
         pageTextField.setPreferredSize(new Dimension(50, 25));
 
+        panel2.add(jbtFirst);
+        panel2.add(jbtPrevious);
+        panel2.add(pageTextField);
+        panel2.add(jbtNext);
+        panel2.add(jbtLast);
 
-        add(jbtFirst);
-        add(jbtPrevious);
-        add(pageTextField);
-        add(jbtNext);
-        add(jbtLast);
+        add(panel1);
+        add(panel2);
 
         // 上一页
         jbtPrevious.addMouseListener(new MouseAdapter() {
@@ -57,7 +82,7 @@ public class PageFooter extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1){
                     goPage = page - 1;
-                    ButtonPanel.jump(name);
+                    RowButtonPanel.jump(name);
                 }
             }
         });
@@ -68,7 +93,7 @@ public class PageFooter extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1){
                     goPage = page + 1;
-                    ButtonPanel.jump(name);
+                    RowButtonPanel.jump(name);
                 }
             }
         });
@@ -79,7 +104,7 @@ public class PageFooter extends JPanel {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     goPage = Integer.parseInt(((JTextField) e.getComponent()).getText());
-                    ButtonPanel.jump(name);
+                    RowButtonPanel.jump(name);
                 }
             }
         });
@@ -89,7 +114,7 @@ public class PageFooter extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 goPage = 1;
-                ButtonPanel.jump(name);
+                RowButtonPanel.jump(name);
             }
         });
 
@@ -97,10 +122,10 @@ public class PageFooter extends JPanel {
         jbtLast.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int lastPage = ButtonPanel.getLastPage(name);
+                int lastPage = RowButtonPanel.getLastPage(name);
                 if (lastPage != -1) {
                     goPage = lastPage;
-                    ButtonPanel.jump(name);
+                    RowButtonPanel.jump(name);
                 } else {
                     JOptionPane.showMessageDialog(jFrame, "非缓存模式不能直接跳转最后一页");
                 }
@@ -109,10 +134,20 @@ public class PageFooter extends JPanel {
     }
 
     // 构造方法
-    public PageFooter(String name) {
+    public RowPageFooter(String name) {
         this.name = name;
         setPage(page);
         pageFooterHashMap.put(name, this);
+    }
+
+    // 设置描述 - static
+    public static void setDesc(String name, String desc) {
+        pageFooterHashMap.get(name).setDesc(desc);
+    }
+
+    private void setDesc(String desc) {
+        this.desc = desc;
+        jLabel.setText(desc);
     }
 
     // 设置页数 - static
@@ -155,7 +190,7 @@ public class PageFooter extends JPanel {
     }
 
     // 删除页面
-    public static PageFooter remove(String name) {
+    public static RowPageFooter remove(String name) {
         return pageFooterHashMap.remove(name);
     }
 }

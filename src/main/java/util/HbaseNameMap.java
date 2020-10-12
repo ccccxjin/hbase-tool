@@ -23,4 +23,9 @@ public class HbaseNameMap {
     public static String getTableName(String name) {
         return tableMap.get(name);
     }
+
+    public static void removeName(String name) {
+        connectionMap.remove(name);
+        tableMap.remove(name);
+    }
 }
