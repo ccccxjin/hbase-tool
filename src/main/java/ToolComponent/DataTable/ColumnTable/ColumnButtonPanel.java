@@ -1,5 +1,6 @@
 package ToolComponent.DataTable.ColumnTable;
 
+import ToolComponent.DataTable.RowTable.RowPageFooter;
 import org.apache.commons.lang.StringUtils;
 import util.CONSTANT;
 import util.CollectionTools;
@@ -97,7 +98,6 @@ public class ColumnButtonPanel {
     static {
         panel.setLayout(null);
         panel.setPreferredSize(new Dimension(0, 150));
-        panel.setBorder(new LineBorder(Color.BLUE));
         PageSizeBox.setEditable(true);
         PageSizeBox.setSelectedIndex(0);
         jbtCacheMode.setSelected(false);
@@ -224,6 +224,7 @@ public class ColumnButtonPanel {
             JOptionPane.showMessageDialog(jFrame, message, "提示", JOptionPane.INFORMATION_MESSAGE);
             ColumnPageFooter.setPage(ColumnPageFooter.getPage());
         }
+        ColumnPageFooter.setDesc(getDescribe());
         enableComponent(true);
     }
 
@@ -337,6 +338,7 @@ public class ColumnButtonPanel {
         minDataRange = 0;
         minTimeText.setText("");
         maxTimeText.setText("");
+        ColumnPageFooter.setDesc(getDescribe());
         ColumnTableView.update(name, data, CONSTANT.COLUMN_TABLE_COLUMNS);
     }
 
@@ -366,6 +368,7 @@ public class ColumnButtonPanel {
         maxTimeText.setText(maxTime1);
 
         ColumnTableView.set(new String[][]{{timestamp, value}}, CONSTANT.COLUMN_TABLE_COLUMNS);
+        ColumnPageFooter.setDesc("1条数据");
         ColumnTableView.setTableRowHeight();
     }
 
@@ -379,5 +382,14 @@ public class ColumnButtonPanel {
 
     public static JPanel getPanel() {
         return panel;
+    }
+
+    // 获取描述信息
+    private static String getDescribe() {
+        if (jbtCacheMode.isSelected()) {
+            return "共" + data.length + "条数据, 分" + (int)Math.ceil((double) data.length / (double) getPageSize()) + "页, 当前页面" + showData1.length + "条数据";
+        } else {
+            return data.length + "条数据";
+        }
     }
 }

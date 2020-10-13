@@ -3,8 +3,7 @@ package ToolComponent;
 import ToolComponent.ConnectTree.TreeModel;
 import ToolComponent.ConnectTree.TreeView;
 import ToolComponent.DataTable.RowTable.TableCards;
-import ToolComponent.DataTable.RowTable.TitleLabel;
-import ToolComponent.DataTable.RowTable.TitlePanel;
+import ToolComponent.DataTable.TitlePanel;
 import util.CollectionTools;
 import util.HbaseNameMap;
 

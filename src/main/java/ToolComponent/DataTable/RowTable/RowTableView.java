@@ -9,6 +9,8 @@ import util.CONSTANT;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -27,6 +29,8 @@ public class RowTableView extends JPanel {
         }
     };
 
+    private static final float[] columnWidthPercentage = {0.15f, 0.15f, 0.7f};
+
     private final String name;
 
     private static final HashMap<String, RowTableView> tableViewHashMap = new HashMap<>();
@@ -36,8 +40,8 @@ public class RowTableView extends JPanel {
         table = new JTable(model);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
         set(new String[][]{}, CONSTANT.ROW_TABLE_COLUMNS);
+        resizeColumns();
         setTableRowHeight();
-        setBorder(new LineBorder(Color.RED));
         add(new JScrollPane(table));
 
         table.addMouseListener(new MouseAdapter() {
@@ -68,6 +72,19 @@ public class RowTableView extends JPanel {
         tableViewHashMap.put(name, this);
     }
 
+    // 设置列宽
+    private void resizeColumns() {
+        int tW = table.getWidth();
+        TableColumn column;
+        TableColumnModel jTableColumnModel = table.getColumnModel();
+        int cantCols = jTableColumnModel.getColumnCount();
+        for (int i = 0; i < cantCols; i++) {
+            column = jTableColumnModel.getColumn(i);
+            int pWidth = Math.round(columnWidthPercentage[i] * tW);
+            column.setPreferredWidth(pWidth);
+        }
+    }
+
     // 设置渲染器
     public void setTableRowHeight() {
         table.getColumnModel().getColumn(2).setCellRenderer(new FamilyColumnRenderer());
@@ -92,6 +109,7 @@ public class RowTableView extends JPanel {
     // 修改数据 - 内部
     public void set(String[][] data, String[] columns) {
         model.setDataVector(data, columns);
+        resizeColumns();
     }
 
     // 清空数据 - static

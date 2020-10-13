@@ -17,7 +17,7 @@ public class TreePanel {
     static {
         topPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         topPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        topPanel.setMinimumSize(new Dimension(200, 200));
+        topPanel.setMinimumSize(new Dimension(200, 300));
         topPanel.getViewport().add(TreeView.getJTree());
         splitPane.setDividerSize(5);
         splitPane.setDividerLocation(0.35);

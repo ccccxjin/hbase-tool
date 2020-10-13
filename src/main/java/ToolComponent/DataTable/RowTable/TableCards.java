@@ -30,25 +30,26 @@ public class TableCards {
      * 添加页面
      */
     public static void addPage(String name) {
+        if (!panelHashMap.containsKey(name)) {
+            JPanel panel = new JPanel(new BorderLayout());
 
-        JPanel panel = new JPanel(new BorderLayout());
+            RowButtonPanel rowButtonPanel = new RowButtonPanel(name);
+            RowTableView rowTableView = new RowTableView(name);
+            RowPageFooter rowPageFooter = new RowPageFooter(name);
 
-        RowButtonPanel rowButtonPanel = new RowButtonPanel(name);
-        RowTableView rowTableView = new RowTableView(name);
-        RowPageFooter rowPageFooter = new RowPageFooter(name);
+            panel.add(rowButtonPanel, BorderLayout.NORTH);
+            panel.add(rowTableView, BorderLayout.CENTER);
+            panel.add(rowPageFooter, BorderLayout.SOUTH);
 
-        panel.add(rowButtonPanel, BorderLayout.NORTH);
-        panel.add(rowTableView, BorderLayout.CENTER);
-        panel.add(rowPageFooter, BorderLayout.SOUTH);
+            cardPanel.add(panel, name);
+            panelHashMap.put(name, panel);
+            cardPanel.repaint();
 
-        cardPanel.add(panel, name);
-        panelHashMap.put(name, panel);
-        cardPanel.repaint();
-
-        // 开发测试信息
-        rowButtonPanel.setRow("183800431");
-        rowButtonPanel.setMinTimeText("2019-03-01 15:13:14");
-        rowButtonPanel.setMaxTimeText("2019-03-01 15:21:14");
+            // 开发测试信息
+            rowButtonPanel.setRow("183800431");
+            rowButtonPanel.setMinTimeText("2019-03-01 15:13:14");
+            rowButtonPanel.setMaxTimeText("2019-03-01 15:21:14");
+        }
     }
 
     /**
@@ -58,7 +59,7 @@ public class TableCards {
         RowButtonPanel.remove(name);
         RowTableView.remove(name);
         RowPageFooter.remove(name);
-        JPanel panel = panelHashMap.get(name);
+        JPanel panel = panelHashMap.remove(name);
         if (panel != null) {
             cardPanel.remove(panel);
         }

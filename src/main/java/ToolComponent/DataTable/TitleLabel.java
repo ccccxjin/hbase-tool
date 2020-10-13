@@ -1,13 +1,15 @@
-package ToolComponent.DataTable.RowTable;
+package ToolComponent.DataTable;
 
+import ToolComponent.DataTable.ColumnTable.ColumnButtonPanel;
+import ToolComponent.DataTable.RowTable.TableCards;
+import javafx.scene.control.Tab;
 import util.CustomIcon;
 import util.HbaseNameMap;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
 
 public class TitleLabel extends JPanel {
@@ -30,6 +32,15 @@ public class TitleLabel extends JPanel {
     // 是否已选择
     private boolean IS_Select = false;
 
+    // 右键菜单
+    private final JPopupMenu jPopupMenu = new JPopupMenu();
+    private final JMenuItem jmClose = new JMenuItem("关闭");
+    private final JMenuItem jmCloseAll = new JMenuItem("关闭全部");
+    private final JMenuItem jmCloseOthers = new JMenuItem("关闭其他");
+
+    // 当前右键点击的标题
+    private TitleLabel rightClickTitleLabel;
+
     {
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         setPreferredSize(new Dimension(TITLE_LENGTH, 30));
@@ -41,6 +52,10 @@ public class TitleLabel extends JPanel {
         jButton.setPreferredSize(new Dimension(20, 18));
         jButton.setVisible(false);
         processSelect(this);
+
+        jPopupMenu.add(jmClose);
+        jPopupMenu.add(jmCloseAll);
+        jPopupMenu.add(jmCloseOthers);
     }
 
     public TitleLabel(String name) {
@@ -49,6 +64,7 @@ public class TitleLabel extends JPanel {
         label.setPreferredSize(new Dimension(200, 30));
         add(label);
         add(jButton);
+        setToolTipText(name);
 
         // 标签 - 鼠标事件
         addMouseListener(new MouseAdapter() {
@@ -71,8 +87,13 @@ public class TitleLabel extends JPanel {
             // 鼠标点击, 处理选中事件, 跳转卡片页面
             @Override
             public void mouseClicked(MouseEvent e) {
-                processSelect((TitleLabel)e.getComponent());
-                TableCards.jumpPage(name);
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    processSelect((TitleLabel)e.getComponent());
+                    TableCards.jumpPage(name);
+                } else if (e.getButton() == MouseEvent.BUTTON3) {
+                    rightClickTitleLabel = (TitleLabel)e.getComponent();
+                    jPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+                }
             }
         });
 
@@ -82,13 +103,9 @@ public class TitleLabel extends JPanel {
             // 处理未选中事件, 删除标题, 删除卡片页面
             @Override
             public void mouseClicked(MouseEvent e) {
-                TitleLabel titleLabel = (TitleLabel)e.getComponent().getParent();
-                if (titleLabel.IS_Select()) {
-                    titleLabel.processUnSelected();
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    closeTitle((TitleLabel)e.getComponent().getParent());
                 }
-                TitlePanel.removeTitle(titleLabel);
-                TableCards.removePage(name);
-                HbaseNameMap.removeName(name);
             }
 
             // 鼠标进入, 图标可见, 修改颜色
@@ -97,6 +114,53 @@ public class TitleLabel extends JPanel {
                 setBackground(selectedColor);
             }
         });
+
+        // 右键关闭
+        jmClose.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getModifiers() == InputEvent.BUTTON1_MASK) {
+                    closeTitle(rightClickTitleLabel);
+                    rightClickTitleLabel = null;
+                    System.out.println("已经关闭页面");
+                    System.out.println();
+                }
+            }
+        });
+
+        // 右键关闭其他
+        jmCloseOthers.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // 关闭其他页面时, 先切换到不关闭的页面
+                processSelect(rightClickTitleLabel);
+                TableCards.jumpPage(rightClickTitleLabel.getLabelName());
+                // 关闭其他页面
+                TitlePanel.closeOtherTitle(rightClickTitleLabel);
+                rightClickTitleLabel = null;
+            }
+        });
+
+        // 右键关闭所有
+        jmCloseAll.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TitlePanel.closeAllTitle();
+                rightClickTitleLabel = null;
+            }
+        });
+    }
+
+    /**
+     * 关闭标签
+     */
+    public static void closeTitle(TitleLabel titleLabel) {
+        if (titleLabel.IS_Select()) {
+            titleLabel.processUnSelected();
+        }
+        TitlePanel.removeTitle(titleLabel);
+        TableCards.removePage(titleLabel.name);
+        HbaseNameMap.removeName(titleLabel.name);
     }
 
     /**
@@ -128,6 +192,7 @@ public class TitleLabel extends JPanel {
             oldSelectedTitle.IS_Select = false;
             TitlePanel.setSelectedLabel(null);
         }
+        ColumnButtonPanel.init();
     }
 
     // 获取名称

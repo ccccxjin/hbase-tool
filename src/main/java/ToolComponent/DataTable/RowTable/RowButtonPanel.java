@@ -1,5 +1,6 @@
 package ToolComponent.DataTable.RowTable;
 
+import ToolComponent.DataTable.TitlePanel;
 import org.apache.commons.lang.StringUtils;
 import util.CONSTANT;
 import util.CollectionTools;
@@ -7,7 +8,6 @@ import util.HbaseNameMap;
 import util.HbaseUtil;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -49,6 +49,7 @@ public class RowButtonPanel extends JPanel {
     private final JButton jbtPrePage = new JButton("上一页");
     private final JRadioButton jbtCacheMode = new JRadioButton("缓存模式");
     private final JRadioButton jbtMillisecondSecond = new JRadioButton("毫秒模式");
+    private final JComboBox<String> dataStruct = new JComboBox<>(new String[]{"text", "json"});
 
     // 纵坐标
     private final int FIRST_ROW_Y = 10;
@@ -96,7 +97,6 @@ public class RowButtonPanel extends JPanel {
     {
         setLayout(null);
         setPreferredSize(new Dimension(0, 150));
-        setBorder(new LineBorder(Color.BLUE));
 
         PageSizeBox.setEditable(true);
         PageSizeBox.setSelectedIndex(3);
@@ -212,6 +212,7 @@ public class RowButtonPanel extends JPanel {
         offset = 0;
         maxSize = 0;
         minDataRange = 0;
+        RowPageFooter.setDesc(name, getDescribe(name));
         RowTableView.update(name, data, CONSTANT.ROW_TABLE_COLUMNS);
     }
 
@@ -465,7 +466,7 @@ public class RowButtonPanel extends JPanel {
     // 获取描述信息
     private String getDescribe() {
         if (jbtCacheMode.isSelected()) {
-            return data.length + "条数据, 分" + data.length / getPageSize() + "页";
+            return "共" + data.length + "条数据, 分" + (int)Math.ceil((double) data.length / (double) getPageSize()) + "页, 当前页面" + showData1.length + "条数据";
         } else {
             return data.length + "条数据";
         }

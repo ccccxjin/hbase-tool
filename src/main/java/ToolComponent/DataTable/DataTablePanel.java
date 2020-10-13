@@ -15,6 +15,8 @@ import java.awt.event.ComponentEvent;
  */
 public class DataTablePanel {
 
+    private static final JPanel panel = new JPanel(new BorderLayout(0, 0));
+
     private static final JSplitPane splitPane = new JSplitPane();
 
     static {
@@ -28,9 +30,12 @@ public class DataTablePanel {
                 splitPane.setDividerLocation(0.6);
             }
         });
+
+        panel.add(TitlePanel.getTitlePanel(), BorderLayout.NORTH);
+        panel.add(splitPane, BorderLayout.CENTER);
     }
 
-    public static JSplitPane getSplitPane() {
-        return splitPane;
+    public static JPanel getPanel() {
+        return panel;
     }
 }

@@ -1,4 +1,4 @@
-package ToolComponent.DataTable.RowTable;
+package ToolComponent.DataTable;
 
 import ToolComponent.CenterWrapper;
 import util.CollectionTools;
@@ -23,7 +23,7 @@ public class TitlePanel {
     private static final JPanel titlePanel = new JPanel();
 
     // 滚动面板
-    private static final JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    private static final JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
     // 标签名称列表
     private static final ArrayList<String> titleList = new ArrayList<>();
@@ -74,7 +74,7 @@ public class TitlePanel {
             @Override
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
-                if (titlePanel.getPreferredSize().getWidth() > RowTablePanel.getPanel().getWidth()) {
+                if (titlePanel.getPreferredSize().getWidth() > DataTablePanel.getPanel().getWidth()) {
                     addArrowButton();
                 } else {
                     removeArrowButton();
@@ -104,15 +104,8 @@ public class TitlePanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                int value = scrollPane.getHorizontalScrollBar().getValue();
-                double maxValue = titlePanel.getPreferredSize().getWidth() - ((JSplitPane) (CenterWrapper.getPanel().getRightComponent())).getLeftComponent().getWidth();
-                if (value <= maxValue) {
-                    if (Math.min(maxValue - value, TITLE_LENGTH) == TITLE_LENGTH)
-                        scrollPane.getHorizontalScrollBar().setValue(value + TITLE_LENGTH);
-                    else
-                        scrollPane.getHorizontalScrollBar().setValue((int) maxValue + 1);
-                    scrollPane.updateUI();
-                }
+                scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getValue() + TITLE_LENGTH);
+                scrollPane.updateUI();
             }
         });
     }
@@ -142,7 +135,7 @@ public class TitlePanel {
             TitleLabel newTitleLabel = new TitleLabel(name);
             innerJPanel.add(newTitleLabel);
             titleLabelHashMap.put(name, newTitleLabel);
-            if (titlePanel.getPreferredSize().getWidth() > RowTablePanel.getPanel().getWidth()) {
+            if (titlePanel.getPreferredSize().getWidth() > DataTablePanel.getPanel().getWidth()) {
                 addArrowButton();
                 addArrowButton();
             }
@@ -158,7 +151,7 @@ public class TitlePanel {
             titleList.remove(name);
             titleLabelHashMap.remove(name);
             innerJPanel.remove(titleLabel);
-            if (titlePanel.getPreferredSize().getWidth() <= RowTablePanel.getPanel().getWidth()) {
+            if (titlePanel.getPreferredSize().getWidth() <= DataTablePanel.getPanel().getWidth()) {
                 removeArrowButton();
                 removeArrowButton();
             }
@@ -186,6 +179,22 @@ public class TitlePanel {
         JPanel panel = titleLabelHashMap.get(name);
         if (panel != null) {
             CollectionTools.enableComponents(panel, enable);
+        }
+    }
+
+    // 关闭所有标签
+    public static void closeAllTitle() {
+        for (TitleLabel titleLabel : ((HashMap<String, TitleLabel>)titleLabelHashMap.clone()).values()) {
+            TitleLabel.closeTitle(titleLabel);
+        }
+    }
+
+    // 关闭其他标签
+    public static void closeOtherTitle(TitleLabel titleLabel) {
+        for (TitleLabel label : ((HashMap<String, TitleLabel>)titleLabelHashMap.clone()).values()) {
+            if (label != titleLabel){
+                TitleLabel.closeTitle(label);
+            }
         }
     }
 }

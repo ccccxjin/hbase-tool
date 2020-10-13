@@ -12,10 +12,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
-public class RowPageFooter extends JPanel {
+public class RowPageFooter extends JPanel{
 
     // 面板
     private final JFrame jFrame = new JFrame();
+
+    // box面板
+    private final Box box = Box.createHorizontalBox();
 
     // 左panel
     private final JPanel panel1 = new JPanel();
@@ -50,22 +53,26 @@ public class RowPageFooter extends JPanel {
     private String desc = "";
 
     {
+        setLayout(new BorderLayout(0, 0));
+        setPreferredSize(new Dimension(0, 26));
 
-        setBorder(new LineBorder(Color.green));
-        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        setPreferredSize(new Dimension(0, 25));
+        box.setAlignmentX(Box.LEFT_ALIGNMENT);
+        box.setAlignmentY(Box.CENTER_ALIGNMENT);
+        box.setPreferredSize(new Dimension(0, 26));
 
+        jLabel.setAlignmentX(JPanel.LEFT_ALIGNMENT);
+        jLabel.setPreferredSize(new Dimension(600, 26));
+
+        panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        panel1.setPreferredSize(new Dimension(200, 26));
         panel1.add(jLabel);
-        panel1.setBorder(new LineBorder(Color.blue));
-        panel1.setPreferredSize(new Dimension(200, 25));
 
-        panel2.setLayout(new FlowLayout(FlowLayout.RIGHT, 1, 0));
-        panel2.setPreferredSize(new Dimension(0, 25));
-        panel1.setBorder(new LineBorder(Color.red));
+        panel2.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        panel2.setPreferredSize(new Dimension(0, 26));
 
         pageTextField.setDocument(new NumberDocument());
         pageTextField.setHorizontalAlignment(JTextField.CENTER);
-        pageTextField.setPreferredSize(new Dimension(50, 25));
+        pageTextField.setPreferredSize(new Dimension(50, 26));
 
         panel2.add(jbtFirst);
         panel2.add(jbtPrevious);
@@ -73,8 +80,9 @@ public class RowPageFooter extends JPanel {
         panel2.add(jbtNext);
         panel2.add(jbtLast);
 
-        add(panel1);
-        add(panel2);
+        box.add(panel1);
+        box.add(panel2);
+        add(box, BorderLayout.CENTER);
 
         // 上一页
         jbtPrevious.addMouseListener(new MouseAdapter() {

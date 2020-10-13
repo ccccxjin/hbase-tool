@@ -9,12 +9,26 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.concurrent.BrokenBarrierException;
 
 public class ColumnPageFooter {
 
+    // 面板
     private static final JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 1, 0));
 
-    // 面板
+    // box面板
+    private static final Box box = Box.createHorizontalBox();
+
+    // 面板1
+    private static final JPanel panel1 = new JPanel();
+
+    // 组件
+    private static final JLabel jLabel = new JLabel();
+
+    // 面板2
+    private static final JPanel panel2 = new JPanel();
+
+    // 弹框面板
     private static final JFrame jFrame = new JFrame();
 
     // 组件
@@ -32,18 +46,36 @@ public class ColumnPageFooter {
     private static int goPage = 0;
 
     static {
-        panel.setPreferredSize(new Dimension(0, 25));
+        panel.setLayout(new BorderLayout(0, 0));
+        panel.setPreferredSize(new Dimension(0, 26));
+
+        box.setAlignmentX(Box.LEFT_ALIGNMENT);
+        box.setAlignmentY(Box.CENTER_ALIGNMENT);
+        box.setPreferredSize(new Dimension(0, 26));
+
+        jLabel.setAlignmentX(JPanel.LEFT_ALIGNMENT);
+        jLabel.setPreferredSize(new Dimension(600, 26));
+
+        panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        panel1.setPreferredSize(new Dimension(200, 26));
+        panel1.add(jLabel);
+
+        panel2.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        panel2.setPreferredSize(new Dimension(0, 26));
 
         pageTextField.setDocument(new NumberDocument());
         pageTextField.setHorizontalAlignment(JTextField.CENTER);
         pageTextField.setPreferredSize(new Dimension(50, 25));
 
+        panel2.add(jbtFirst);
+        panel2.add(jbtPrevious);
+        panel2.add(pageTextField);
+        panel2.add(jbtNext);
+        panel2.add(jbtLast);
 
-        panel.add(jbtFirst);
-        panel.add(jbtPrevious);
-        panel.add(pageTextField);
-        panel.add(jbtNext);
-        panel.add(jbtLast);
+        box.add(panel1);
+        box.add(panel2);
+        panel.add(box, BorderLayout.CENTER);
 
         // 上一页
         jbtPrevious.addMouseListener(new MouseAdapter() {
@@ -107,6 +139,11 @@ public class ColumnPageFooter {
         page = newPage;
         goPage = newPage;
         pageTextField.setText(String.valueOf(page));
+    }
+
+    // 设置描述
+    public static void setDesc(String desc) {
+        jLabel.setText(desc);
     }
 
     // 设置未来页数
