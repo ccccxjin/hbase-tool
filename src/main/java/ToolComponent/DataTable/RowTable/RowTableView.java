@@ -3,7 +3,6 @@ package ToolComponent.DataTable.RowTable;
 import ToolComponent.DataTable.ColumnTable.ColumnButtonPanel;
 import ToolComponent.DataTable.FamilyColumnRenderer;
 import ToolComponent.DataTable.VersionRenderer;
-import org.apache.hadoop.hbase.client.Row;
 import util.CONSTANT;
 
 import javax.swing.*;

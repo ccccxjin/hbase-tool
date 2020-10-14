@@ -1,6 +1,6 @@
 package ToolComponent.DataTable.ColumnTable;
 
-import ToolComponent.DataTable.RowTable.RowPageFooter;
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import util.CONSTANT;
 import util.CollectionTools;
@@ -10,6 +10,8 @@ import util.NumberDocument;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -28,12 +30,14 @@ public class ColumnButtonPanel {
     private static final JLabel minTimeLabel = new JLabel("minTime");
     private static final JLabel maxTimeLabel = new JLabel("maxTime");
     private static final JLabel PageSizeLabel = new JLabel("pageSize");
+    private static final JLabel dataStructLabel = new JLabel("数据格式");
 
     // 输入框组件
     private static final JTextField versionText = new JTextField();
     private static final JTextField minTimeText = new JTextField();
     private static final JTextField maxTimeText = new JTextField();
     private static final JComboBox<String> PageSizeBox = new JComboBox<>(new String[]{"10", "20", "50", "100", "500", "1000", "全部显示",});
+    private static final JComboBox<String> dataStructBox = new JComboBox<>(new String[]{"text", "json"});
 
     // 控制组件
     private static final JButton jbtSearch = new JButton("查找");
@@ -47,6 +51,7 @@ public class ColumnButtonPanel {
     private static final int FIRST_ROW_Y = 10;
     private static final int SECOND_ROW_Y = 50;
     private static final int THIRD_ROW_Y = 90;
+    private static final int FORTH_ROW_Y = 130;
 
     // 组件大小
     private static final int LABEL_WIDTH = 60;
@@ -95,9 +100,15 @@ public class ColumnButtonPanel {
     // table显示参数, minDataRange: 开始显示的数据, maxDataRange: 结束显示的数据
     private static int minDataRange;
 
+    // text数据
+    private static String[][] textData = new String[][]{};
+
+    // json数据
+    private static String[][] jsonData = new String[][]{};
+
     static {
         panel.setLayout(null);
-        panel.setPreferredSize(new Dimension(0, 150));
+        panel.setPreferredSize(new Dimension(0, 170));
         PageSizeBox.setEditable(true);
         PageSizeBox.setSelectedIndex(0);
         jbtCacheMode.setSelected(false);
@@ -118,6 +129,8 @@ public class ColumnButtonPanel {
         panel.add(jbtRefresh);
         panel.add(jbtCacheMode);
         panel.add(jbtMillisecondSecond);
+        panel.add(dataStructLabel);
+        panel.add(dataStructBox);
 
         minTimeLabel.setBounds(FIRST_COL_X, FIRST_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
         minTimeText.setBounds(SECOND_COL_X, FIRST_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
@@ -129,8 +142,12 @@ public class ColumnButtonPanel {
         PageSizeLabel.setBounds(THIRD_COL_X, SECOND_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
         PageSizeBox.setBounds(FOURTH_COL_X, SECOND_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
 
-        jbtSearch.setBounds(SECOND_COL_X, THIRD_ROW_Y, 60, 25);
-        jbtRefresh.setBounds(THIRD_COL_X, THIRD_ROW_Y, 60, 25);
+        dataStructLabel.setBounds(FIRST_COL_X, THIRD_ROW_Y, 100, 25);
+        dataStructBox.setBounds(SECOND_COL_X, THIRD_ROW_Y, 100, 25);
+
+        jbtSearch.setBounds(SECOND_COL_X, FORTH_ROW_Y, 60, 25);
+        jbtRefresh.setBounds(THIRD_COL_X, FORTH_ROW_Y, 60, 25);
+
         jbtCacheMode.setBounds(FIFTH_COL_X, FIRST_ROW_Y, 100, 25);
         jbtMillisecondSecond.setBounds(FIFTH_COL_X, SECOND_ROW_Y, 100, 25);
 
@@ -160,6 +177,34 @@ public class ColumnButtonPanel {
                 );
                 if (res == JOptionPane.OK_OPTION) {
                     init();
+                }
+            }
+        });
+
+        // 切换数据结构
+        dataStructBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getItem() == "text") {
+                    if (textData.length == 0) {
+                        textData = new String[showData1.length][];
+                        for (int i = 0; i < showData1.length; i++) {
+                            String timestamp = showData1[i][0];
+                            String value = showData1[i][1];
+                            textData[i] = new String[]{timestamp, value};
+                        }
+                    }
+                    ColumnTableView.update(name, textData, CONSTANT.COLUMN_TABLE_COLUMNS);
+                } else if (e.getItem() == "json") {
+                    if (jsonData.length == 0) {
+                        jsonData = new String[showData1.length][];
+                        for (int i = 0; i < showData1.length; i++) {
+                            String timestamp = showData1[i][0];
+                            String value = JSON.parseObject(showData1[i][1]).toJSONString();
+                            jsonData[i] = new String[]{timestamp, value};
+                        }
+                    }
+                    ColumnTableView.update(name, jsonData, CONSTANT.COLUMN_TABLE_COLUMNS);
                 }
             }
         });
@@ -230,10 +275,23 @@ public class ColumnButtonPanel {
 
     private static void parseData() {
         showData1 = new String[showData.length][];
-        for (int i = 0; i < showData.length; i++) {
-            String timestamp = showData[i][2];
-            String value = showData[i][3];
-            showData1[i] = new String[]{timestamp, value};
+        Object struct = dataStructBox.getSelectedItem();
+        textData = new String[][]{};
+        jsonData = new String[][]{};
+        if (struct != null) {
+            if (struct.equals("text")) {
+                for (int i = 0; i < showData.length; i++) {
+                    String timestamp = showData[i][2];
+                    String value = showData[i][3];
+                    showData1[i] = new String[]{timestamp, value};
+                }
+            } else if (struct.equals("json")) {
+                for (int i = 0; i < showData.length; i++) {
+                    String timestamp = showData[i][2];
+                    String value = JSON.parseObject(showData[i][3]).toJSONString();
+                    showData1[i] = new String[]{timestamp, value};
+                }
+            }
         }
     }
 
@@ -367,7 +425,10 @@ public class ColumnButtonPanel {
         minTimeText.setText(minTime);
         maxTimeText.setText(maxTime1);
 
-        ColumnTableView.set(new String[][]{{timestamp, value}}, CONSTANT.COLUMN_TABLE_COLUMNS);
+
+        showData1 = new String[][]{{timestamp, value}};
+
+        ColumnTableView.set(showData1, CONSTANT.COLUMN_TABLE_COLUMNS);
         ColumnPageFooter.setDesc("1条数据");
         ColumnTableView.setTableRowHeight();
     }

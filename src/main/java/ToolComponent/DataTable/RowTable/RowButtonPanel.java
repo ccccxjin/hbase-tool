@@ -1,7 +1,10 @@
 package ToolComponent.DataTable.RowTable;
 
 import ToolComponent.DataTable.TitlePanel;
+import com.alibaba.fastjson.JSON;
+import org.apache.avro.data.Json;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.node.JsonNodeFactory;
 import util.CONSTANT;
 import util.CollectionTools;
 import util.HbaseNameMap;
@@ -9,6 +12,8 @@ import util.HbaseUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -33,6 +38,7 @@ public class RowButtonPanel extends JPanel {
     private final JLabel minTimeLabel = new JLabel("minTime");
     private final JLabel maxTimeLabel = new JLabel("maxTime");
     private final JLabel PageSizeLabel = new JLabel("pageSize");
+    private final JLabel dataStructLabel = new JLabel("数据格式");
 
     // 输入框组件
     private final JTextField rowText = new JTextField();
@@ -41,6 +47,7 @@ public class RowButtonPanel extends JPanel {
     private final JTextField minTimeText = new JTextField();
     private final JTextField maxTimeText = new JTextField();
     private final JComboBox<String> PageSizeBox = new JComboBox<>(new String[]{"10", "20", "50", "100", "500", "1000", "全部显示",});
+    private final JComboBox<String> dataStructBox = new JComboBox<>(new String[]{"text", "json"});
 
     // 控制组件
     private final JButton jbtSearch = new JButton("查找");
@@ -49,12 +56,12 @@ public class RowButtonPanel extends JPanel {
     private final JButton jbtPrePage = new JButton("上一页");
     private final JRadioButton jbtCacheMode = new JRadioButton("缓存模式");
     private final JRadioButton jbtMillisecondSecond = new JRadioButton("毫秒模式");
-    private final JComboBox<String> dataStruct = new JComboBox<>(new String[]{"text", "json"});
 
     // 纵坐标
     private final int FIRST_ROW_Y = 10;
     private final int SECOND_ROW_Y = 50;
     private final int THIRD_ROW_Y = 90;
+    private final int FORTH_ROW_Y = 130;
 
     // 组件大小
     private final int LABEL_WIDTH = 60;
@@ -94,9 +101,15 @@ public class RowButtonPanel extends JPanel {
     // table显示参数, minDataRange: 开始显示的数据, maxDataRange: 结束显示的数据
     private int minDataRange;
 
+    // text数据
+    private String[][] textData = new String[][]{};
+
+    // json数据
+    private String[][] jsonData = new String[][]{};
+
     {
         setLayout(null);
-        setPreferredSize(new Dimension(0, 150));
+        setPreferredSize(new Dimension(0, 170));
 
         PageSizeBox.setEditable(true);
         PageSizeBox.setSelectedIndex(3);
@@ -119,6 +132,8 @@ public class RowButtonPanel extends JPanel {
         add(jbtRefresh);
         add(jbtCacheMode);
         add(jbtMillisecondSecond);
+        add(dataStructLabel);
+        add(dataStructBox);
 
         rowLabel.setBounds(FIRST_COL_X, FIRST_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
         rowText.setBounds(SECOND_COL_X, FIRST_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
@@ -134,8 +149,12 @@ public class RowButtonPanel extends JPanel {
         PageSizeLabel.setBounds(FIFTH_COL_X, SECOND_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
         PageSizeBox.setBounds(SIXTH_COL_X, SECOND_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
 
-        jbtSearch.setBounds(SECOND_COL_X, THIRD_ROW_Y, 60, 25);
-        jbtRefresh.setBounds(THIRD_COL_X, THIRD_ROW_Y, 60, 25);
+        dataStructLabel.setBounds(FIRST_COL_X, THIRD_ROW_Y, 100, 25);
+        dataStructBox.setBounds(SECOND_COL_X, THIRD_ROW_Y, 100, 25);
+
+        jbtSearch.setBounds(SECOND_COL_X, FORTH_ROW_Y, 60, 25);
+        jbtRefresh.setBounds(THIRD_COL_X, FORTH_ROW_Y, 60, 25);
+
         jbtCacheMode.setBounds(SEVENTH_COL_X, FIRST_ROW_Y, 100, 25);
         jbtMillisecondSecond.setBounds(SEVENTH_COL_X, SECOND_ROW_Y, 100, 25);
 
@@ -170,6 +189,38 @@ public class RowButtonPanel extends JPanel {
                 );
                 if (res == JOptionPane.OK_OPTION) {
                     init();
+                }
+            }
+        });
+
+        // 切换数据结构
+        dataStructBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getItem() == "text") {
+                    if (textData.length == 0) {
+                        textData = new String[showData.length][];
+                        for (int i = 0; i < showData.length; i++) {
+                            String family = showData[i][0];
+                            String column = showData[i][1];
+                            String timestamp = showData[i][2];
+                            String value = showData[i][3];
+                            textData[i] = new String[]{family + ":" + column, timestamp, value};
+                        }
+                    }
+                    RowTableView.update(name, textData, CONSTANT.ROW_TABLE_COLUMNS);
+                } else if (e.getItem() == "json") {
+                    if (jsonData.length == 0) {
+                        jsonData = new String[showData.length][];
+                        for (int i = 0; i < showData.length; i++) {
+                            String family = showData[i][0];
+                            String column = showData[i][1];
+                            String timestamp = showData[i][2];
+                            String value = JSON.parseObject(showData[i][3]).toJSONString();
+                            jsonData[i] = new String[]{family + ":" + column, timestamp, value};
+                        }
+                    }
+                    RowTableView.update(name, jsonData, CONSTANT.ROW_TABLE_COLUMNS);
                 }
             }
         });
@@ -269,12 +320,27 @@ public class RowButtonPanel extends JPanel {
      */
     private void parseData() {
         showData1 = new String[showData.length][];
-        for (int i = 0; i < showData.length; i++) {
-            String family = showData[i][0];
-            String column = showData[i][1];
-            String timestamp = showData[i][2];
-            String value = showData[i][3];
-            showData1[i] = new String[]{family + ":" + column, timestamp, value};
+        Object struct = dataStructBox.getSelectedItem();
+        textData = new String[][]{};
+        jsonData = new String[][]{};
+        if (struct != null) {
+            if (struct.equals("text")) {
+                for (int i = 0; i < showData.length; i++) {
+                    String family = showData[i][0];
+                    String column = showData[i][1];
+                    String timestamp = showData[i][2];
+                    String value = showData[i][3];
+                    showData1[i] = new String[]{family + ":" + column, timestamp, value};
+                }
+            } else if (struct.equals("json")) {
+                for (int i = 0; i < showData.length; i++) {
+                    String family = showData[i][0];
+                    String column = showData[i][1];
+                    String timestamp = showData[i][2];
+                    String value = JSON.parseObject(showData[i][3]).toJSONString();
+                    showData1[i] = new String[]{family + ":" + column, timestamp, value};
+                }
+            }
         }
     }
 
