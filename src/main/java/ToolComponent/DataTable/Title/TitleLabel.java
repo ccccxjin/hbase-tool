@@ -1,10 +1,9 @@
-package ToolComponent.DataTable;
+package ToolComponent.DataTable.Title;
 
 import ToolComponent.DataTable.ColumnTable.ColumnButtonPanel;
-import ToolComponent.DataTable.RowTable.TableCards;
-import javafx.scene.control.Tab;
+import ToolComponent.DataTable.RowTable.RowCardsPanel;
+import util.CollectionTools;
 import util.CustomIcon;
-import util.HbaseNameMap;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -13,6 +12,9 @@ import java.awt.event.*;
 
 
 public class TitleLabel extends JPanel {
+
+    private final String name;
+
     // 图标
     private static final ImageIcon tableIcon = new CustomIcon(TitlePanel.class.getResource("/table/table.png"), CustomIcon.CONNECT_TREE_SIZE);
     private static final ImageIcon closeIcon = new CustomIcon(TitlePanel.class.getResource("/table/close.png"), new int[]{10, 10});
@@ -20,6 +22,8 @@ public class TitleLabel extends JPanel {
     // 颜色
     private static final Color selectedColor = new Color(0xD9D9D9);
     private static final Color notSelectedColor = new Color(238, 238, 238);
+    private static final Color onButtonColor = new Color(0xC3C3C3);
+
 
     // 长度
     private static final int TITLE_LENGTH = 222;
@@ -27,7 +31,8 @@ public class TitleLabel extends JPanel {
     // 组件
     private final JLabel label;
     private final JButton jButton;
-    private final String name;
+    private final JLabel placeLabel = new JLabel();
+
 
     // 是否已选择
     private boolean IS_Select = false;
@@ -58,13 +63,20 @@ public class TitleLabel extends JPanel {
         jPopupMenu.add(jmCloseOthers);
     }
 
-    public TitleLabel(String name) {
+    public TitleLabel(String dbName, String tableName) {
+        String name = CollectionTools.structTitle(dbName, tableName);
         this.name = name;
         label = new JLabel(name, tableIcon, SwingConstants.LEFT);
-        label.setPreferredSize(new Dimension(200, 30));
+        label.setPreferredSize(new Dimension(195, 30));
+        placeLabel.setPreferredSize(new Dimension(5, 30));
+
         add(label);
         add(jButton);
+        add(placeLabel);
+
         setToolTipText(name);
+
+        RowCardsPanel.addPage(dbName, tableName);
 
         // 标签 - 鼠标事件
         addMouseListener(new MouseAdapter() {
@@ -80,16 +92,18 @@ public class TitleLabel extends JPanel {
             @Override
             public void mouseExited(MouseEvent e) {
                 jButton.setVisible(false);
-                if (!IS_Select)
+                if (!IS_Select){
                     setBackground(notSelectedColor);
+                }
+
             }
 
-            // 鼠标点击, 处理选中事件, 跳转卡片页面
+            // 鼠标点击
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     processSelect((TitleLabel)e.getComponent());
-                    TableCards.jumpPage(name);
+                    RowCardsPanel.show(name);
                 } else if (e.getButton() == MouseEvent.BUTTON3) {
                     rightClickTitleLabel = (TitleLabel)e.getComponent();
                     jPopupMenu.show(e.getComponent(), e.getX(), e.getY());
@@ -104,14 +118,19 @@ public class TitleLabel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    closeTitle((TitleLabel)e.getComponent().getParent());
+                    ((TitleLabel)e.getComponent().getParent()).close();
                 }
             }
 
             // 鼠标进入, 图标可见, 修改颜色
             public void mouseEntered(MouseEvent e) {
                 jButton.setVisible(true);
-                setBackground(selectedColor);
+                jButton.setBackground(onButtonColor);
+            }
+
+            // 鼠标退出
+            public void mouseExited(MouseEvent event) {
+                jButton.setBackground(selectedColor);
             }
         });
 
@@ -120,10 +139,8 @@ public class TitleLabel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getModifiers() == InputEvent.BUTTON1_MASK) {
-                    closeTitle(rightClickTitleLabel);
+                    rightClickTitleLabel.close();
                     rightClickTitleLabel = null;
-                    System.out.println("已经关闭页面");
-                    System.out.println();
                 }
             }
         });
@@ -132,12 +149,14 @@ public class TitleLabel extends JPanel {
         jmCloseOthers.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // 关闭其他页面时, 先切换到不关闭的页面
-                processSelect(rightClickTitleLabel);
-                TableCards.jumpPage(rightClickTitleLabel.getLabelName());
-                // 关闭其他页面
-                TitlePanel.closeOtherTitle(rightClickTitleLabel);
-                rightClickTitleLabel = null;
+                if (e.getModifiers() == InputEvent.BUTTON1_MASK) {
+                    // 关闭其他页面时, 先切换到不关闭的页面
+                    processSelect(rightClickTitleLabel);
+                    RowCardsPanel.show(rightClickTitleLabel.getLabelName());
+                    // 关闭其他页面
+                    TitlePanel.closeOtherTitle(rightClickTitleLabel);
+                    rightClickTitleLabel = null;
+                }
             }
         });
 
@@ -145,8 +164,10 @@ public class TitleLabel extends JPanel {
         jmCloseAll.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                TitlePanel.closeAllTitle();
-                rightClickTitleLabel = null;
+                if (e.getModifiers() == InputEvent.BUTTON1_MASK) {
+                    TitlePanel.closeAllTitle();
+                    rightClickTitleLabel = null;
+                }
             }
         });
     }
@@ -154,13 +175,12 @@ public class TitleLabel extends JPanel {
     /**
      * 关闭标签
      */
-    public static void closeTitle(TitleLabel titleLabel) {
-        if (titleLabel.IS_Select()) {
-            titleLabel.processUnSelected();
+    public void close() {
+        if (IS_Select()) {
+            processUnSelected();
         }
-        TitlePanel.removeTitle(titleLabel);
-        TableCards.removePage(titleLabel.name);
-        HbaseNameMap.removeName(titleLabel.name);
+        TitlePanel.removeTitle(this);
+        RowCardsPanel.removePage(name);
     }
 
     /**

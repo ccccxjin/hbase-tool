@@ -1,4 +1,4 @@
-package ToolComponent.DataTable.RowTable.RowTablePackage;
+package ToolComponent.DataTable.RowTable;
 
 import util.CustomIcon;
 import util.NumberDocument;
@@ -11,30 +11,30 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class RowPageFooterView extends JPanel {
-    // 面板
-    private final JFrame jFrame = new JFrame();
+
+    // 页数
+    private int page;
+
+    // model
+    private RowModel model;
 
     // box面板
     private final Box box = Box.createHorizontalBox();
 
     // 左panel
-    private final JPanel panel1 = new JPanel();
+    private final JPanel leftPanel = new JPanel();
+
+    // 右panel
+    private final JPanel rightPanel = new JPanel();
 
     // 组件
     private final JLabel jLabel = new JLabel();
 
-    // 右panel
-    private final JPanel panel2 = new JPanel();
-
-    // 组件
     private final JButton jbtLast = new JButton(new CustomIcon(getClass().getResource("/table/lastPage.png"), CustomIcon.CONNECT_TREE_SIZE));
     private final JButton jbtFirst = new JButton(new CustomIcon(getClass().getResource("/table/firstPage.png"), CustomIcon.CONNECT_TREE_SIZE));
     private final JButton jbtNext = new JButton(new CustomIcon(getClass().getResource("/table/nextPage.png"), CustomIcon.CONNECT_TREE_SIZE));
     private final JButton jbtPrevious = new JButton(new CustomIcon(getClass().getResource("/table/prePage.png"), CustomIcon.CONNECT_TREE_SIZE));
     private final JTextField pageTextField = new JTextField("0", 3);
-
-    // 页数
-    private int page;
 
     {
         setLayout(new BorderLayout(0, 0));
@@ -47,25 +47,25 @@ public class RowPageFooterView extends JPanel {
         jLabel.setAlignmentX(JPanel.LEFT_ALIGNMENT);
         jLabel.setPreferredSize(new Dimension(600, 26));
 
-        panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        panel1.setPreferredSize(new Dimension(200, 26));
-        panel1.add(jLabel);
+        leftPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        leftPanel.setPreferredSize(new Dimension(200, 26));
+        leftPanel.add(jLabel);
 
-        panel2.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        panel2.setPreferredSize(new Dimension(0, 26));
+        rightPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        rightPanel.setPreferredSize(new Dimension(0, 26));
 
         pageTextField.setDocument(new NumberDocument());
         pageTextField.setHorizontalAlignment(JTextField.CENTER);
         pageTextField.setPreferredSize(new Dimension(50, 26));
 
-        panel2.add(jbtFirst);
-        panel2.add(jbtPrevious);
-        panel2.add(pageTextField);
-        panel2.add(jbtNext);
-        panel2.add(jbtLast);
+        rightPanel.add(jbtFirst);
+        rightPanel.add(jbtPrevious);
+        rightPanel.add(pageTextField);
+        rightPanel.add(jbtNext);
+        rightPanel.add(jbtLast);
 
-        box.add(panel1);
-        box.add(panel2);
+        box.add(leftPanel);
+        box.add(rightPanel);
         add(box, BorderLayout.CENTER);
 
         // 上一页
@@ -73,7 +73,7 @@ public class RowPageFooterView extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-
+                    model.jump(page - 1);
                 }
             }
         });
@@ -83,7 +83,7 @@ public class RowPageFooterView extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-
+                    model.jump(page + 1);
                 }
             }
         });
@@ -93,7 +93,12 @@ public class RowPageFooterView extends JPanel {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-
+                    String inputPage = pageTextField.getText();
+                    if (inputPage != null) {
+                        if (Integer.parseInt(inputPage) != page) {
+                            model.jump(Integer.parseInt(inputPage));
+                        }
+                    }
                 }
             }
         });
@@ -103,7 +108,7 @@ public class RowPageFooterView extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-
+                    model.jump(1);
                 }
             }
         });
@@ -113,7 +118,7 @@ public class RowPageFooterView extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-
+                    model.jumpLast();
                 }
             }
         });
@@ -121,6 +126,7 @@ public class RowPageFooterView extends JPanel {
 
     // 设置页数
     public void setPage(int page) {
+        this.page = page;
         pageTextField.setText(String.valueOf(page));
     }
 
@@ -132,5 +138,10 @@ public class RowPageFooterView extends JPanel {
     // 获取页数
     public int getPage() {
         return page;
+    }
+
+    // 设置model
+    public void setModel(RowModel model) {
+        this.model = model;
     }
 }

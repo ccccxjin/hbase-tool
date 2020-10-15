@@ -1,4 +1,4 @@
-package ToolComponent.DataTable.RowTable.RowTablePackage;
+package ToolComponent.DataTable.RowTable;
 
 import org.apache.commons.lang.StringUtils;
 import util.CollectionTools;
@@ -16,6 +16,13 @@ public class RowButtonView extends JPanel{
     // 提示界面
     private final JFrame jFrame = new JFrame();
 
+    // model
+    private RowModel model = new RowModel();
+
+    // 数据库, 表名
+    private String dbName;
+    private String tableName;
+
     // label组件
     private final JLabel rowLabel = new JLabel("row");
     private final JLabel familyLabel = new JLabel("family");
@@ -26,11 +33,11 @@ public class RowButtonView extends JPanel{
     private final JLabel dataStructLabel = new JLabel("数据格式");
 
     // 输入框组件
-    private final JTextField rowText = new JTextField();
+    private final JTextField rowText = new JTextField("00010070");
     private final JTextField familyText = new JTextField();
     private final JTextField columnText = new JTextField();
-    private final JTextField minTimeText = new JTextField();
-    private final JTextField maxTimeText = new JTextField();
+    private final JTextField minTimeText = new JTextField("2018-10-15 16:00:00");
+    private final JTextField maxTimeText = new JTextField("2018-10-16 16:00:00");
     private final JComboBox<String> PageSizeBox = new JComboBox<>(new String[]{"10", "20", "50", "100", "500", "1000", "全部显示",});
     private final JComboBox<String> dataStructBox = new JComboBox<>(new String[]{"text", "json"});
 
@@ -126,7 +133,7 @@ public class RowButtonView extends JPanel{
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     new Thread(() -> {
-
+                        model.search();
                     }).start();
                 }
             }
@@ -140,7 +147,14 @@ public class RowButtonView extends JPanel{
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     new Thread(() -> {
-
+                        int res = JOptionPane.showOptionDialog(
+                                jFrame, "修改缓存模式, 需要清空当前页面的数据", "修改缓存模式",
+                                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                                null, new String[]{"确认", "取消"}, null
+                        );
+                        if (res == JOptionPane.OK_OPTION) {
+                            model.changeCacheMode();
+                        }
                     }).start();
                 }
             }
@@ -152,16 +166,39 @@ public class RowButtonView extends JPanel{
         dataStructBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                new Thread(() -> {
-
-                }).start();
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    new Thread(() -> {
+                        model.changeDataStruct();
+                    }).start();
+                }
             }
         });
+
+
     }
 
-    // 获取信息
+    /**
+     * 构造方法
+     */
+    public RowButtonView(String dbName, String tableName) {
+        this.dbName = dbName;
+        this.tableName = tableName;
+    }
+
+    /**
+     * 设置模型
+     */
+    public void setModel(RowModel model) {
+        this.model = model;
+    }
+
+    /**
+     * 获取信息
+     */
     public HashMap<String, Object> getButtonInfo() {
         return new HashMap<String, Object>(){{
+            put("dbName", dbName);
+            put("tableName", tableName);
             put("row", rowText.getText().trim());
             put("family", familyText.getText().trim());
             put("column", columnText.getText().trim());
@@ -174,7 +211,9 @@ public class RowButtonView extends JPanel{
         }};
     }
 
-    // 时间处理
+    /**
+     * 时间处理
+     */
     private long timeProcess(String time) {
         boolean isMilliSecondMode = jbtMillisecondSecond.isSelected();
         try {
@@ -198,7 +237,9 @@ public class RowButtonView extends JPanel{
         }
     }
 
-    // 获取数据结构
+    /**
+     * 获取数据结构
+     */
     private String getDataStruct() {
         Object struct = dataStructBox.getSelectedItem();
         if (struct == null || struct.equals("") || struct.equals("text")) {
@@ -210,9 +251,11 @@ public class RowButtonView extends JPanel{
         return "text";
     }
 
-    // 获取单页数量
+    /**
+     * 获取单页数量
+     */
     private int getPageSize() {
-        Object pageSize = PageSizeBox.getSelectedIndex();
+        Object pageSize = PageSizeBox.getSelectedItem();
         if (pageSize == null || pageSize.equals("") || pageSize.equals("全部显示")) {
             return 0;
         }

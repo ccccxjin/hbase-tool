@@ -1,7 +1,8 @@
 package ToolComponent.DataTable;
 
 import ToolComponent.DataTable.ColumnTable.ColumnTablePanel;
-import ToolComponent.DataTable.RowTable.RowTablePanel;
+import ToolComponent.DataTable.RowTable.RowCardsPanel;
+import ToolComponent.DataTable.Title.TitlePanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,9 +22,10 @@ public class DataTablePanel {
 
     static {
         splitPane.setDividerSize(5);
-        splitPane.setLeftComponent(RowTablePanel.getPanel());
+        splitPane.setLeftComponent(RowCardsPanel.getCardPanel());
         splitPane.setRightComponent(ColumnTablePanel.getPanel());
         splitPane.setDividerLocation(0.5);
+
         splitPane.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {

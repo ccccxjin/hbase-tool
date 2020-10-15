@@ -1,12 +1,11 @@
 package ToolComponent.DataTable.ColumnTable;
 
 
-import ToolComponent.DataTable.FamilyColumnRenderer;
-import ToolComponent.DataTable.VersionRenderer;
+import ToolComponent.DataTable.Render.FamilyColumnRenderer;
+import ToolComponent.DataTable.Render.VersionRenderer;
 import util.CONSTANT;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;

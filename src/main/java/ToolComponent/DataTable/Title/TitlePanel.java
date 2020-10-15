@@ -1,6 +1,6 @@
-package ToolComponent.DataTable;
+package ToolComponent.DataTable.Title;
 
-import ToolComponent.CenterWrapper;
+import ToolComponent.DataTable.DataTablePanel;
 import util.CollectionTools;
 import util.CustomIcon;
 
@@ -25,15 +25,6 @@ public class TitlePanel {
     // 滚动面板
     private static final JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-    // 标签名称列表
-    private static final ArrayList<String> titleList = new ArrayList<>();
-
-    // 标签存储map
-    private static final HashMap<String, TitleLabel> titleLabelHashMap = new HashMap<>();
-
-    // 当前已选择的标签
-    private static TitleLabel SELECTED_LABEL;
-
     // 内部容器
     private static final JPanel innerJPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
@@ -46,6 +37,13 @@ public class TitlePanel {
 
     // 标签宽度
     private static final int TITLE_LENGTH = 222;
+
+    // 标签名称列表
+    private static final HashMap<String, TitleLabel> titleHashMap = new HashMap<>();
+
+    // 当前已选择的标签
+    private static TitleLabel SELECTED_LABEL;
+
 
     static {
         BoxLayout boxLayout = new BoxLayout(titlePanel, BoxLayout.X_AXIS);
@@ -129,27 +127,26 @@ public class TitlePanel {
     }
 
     // 添加标签
-    public static void addTitle(String name) {
-        if (!titleList.contains(name)) {
-            titleList.add(name);
-            TitleLabel newTitleLabel = new TitleLabel(name);
+    public static void add(String dbName, String tableName) {
+        String name = CollectionTools.structTitle(dbName, tableName);
+        if (!titleHashMap.containsKey(name)) {
+            TitleLabel newTitleLabel = new TitleLabel(dbName, tableName);
+            titleHashMap.put(name, newTitleLabel);
             innerJPanel.add(newTitleLabel);
-            titleLabelHashMap.put(name, newTitleLabel);
             if (titlePanel.getPreferredSize().getWidth() > DataTablePanel.getPanel().getWidth()) {
                 addArrowButton();
                 addArrowButton();
             }
             titlePanel.updateUI();
-            scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getMaximum());
+            scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getMaximum() + TITLE_LENGTH);
         }
     }
 
     // 删除标签
     public static void removeTitle(TitleLabel titleLabel) {
         String name = titleLabel.getLabelName();
-        if (titleList.contains(name)) {
-            titleList.remove(name);
-            titleLabelHashMap.remove(name);
+        if (titleHashMap.containsKey(name)) {
+            titleHashMap.remove(name);
             innerJPanel.remove(titleLabel);
             if (titlePanel.getPreferredSize().getWidth() <= DataTablePanel.getPanel().getWidth()) {
                 removeArrowButton();
@@ -169,31 +166,20 @@ public class TitlePanel {
         SELECTED_LABEL = selectedLabel;
     }
 
-    // 获取标签
-    public static TitleLabel getTitleLabel(String name) {
-        return titleLabelHashMap.get(name);
-    }
-
-    // 修改标签状态
-    public static void enableComponent(String name, boolean enable) {
-        JPanel panel = titleLabelHashMap.get(name);
-        if (panel != null) {
-            CollectionTools.enableComponents(panel, enable);
-        }
-    }
-
     // 关闭所有标签
     public static void closeAllTitle() {
-        for (TitleLabel titleLabel : ((HashMap<String, TitleLabel>)titleLabelHashMap.clone()).values()) {
-            TitleLabel.closeTitle(titleLabel);
+        for (TitleLabel title : ((HashMap<String, TitleLabel>)titleHashMap.clone()).values()) {
+            title.close();
+            removeTitle(title);
         }
     }
 
     // 关闭其他标签
     public static void closeOtherTitle(TitleLabel titleLabel) {
-        for (TitleLabel label : ((HashMap<String, TitleLabel>)titleLabelHashMap.clone()).values()) {
-            if (label != titleLabel){
-                TitleLabel.closeTitle(label);
+        for (TitleLabel title : ((HashMap<String, TitleLabel>)titleHashMap.clone()).values()) {
+            if (title != titleLabel){
+                title.close();
+                removeTitle(title);
             }
         }
     }

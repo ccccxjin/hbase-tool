@@ -1,4 +1,4 @@
-package ToolComponent.DataTable;
+package ToolComponent.DataTable.Render;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;

@@ -2,10 +2,9 @@ package ToolComponent;
 
 import ToolComponent.ConnectTree.TreeModel;
 import ToolComponent.ConnectTree.TreeView;
-import ToolComponent.DataTable.RowTable.TableCards;
-import ToolComponent.DataTable.TitlePanel;
+import ToolComponent.DataTable.RowTable.RowCardsPanel;
+import ToolComponent.DataTable.Title.TitlePanel;
 import util.CollectionTools;
-import util.HbaseNameMap;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -396,9 +395,7 @@ public class ConnectOperationPopup {
 
         String name = CollectionTools.structTitle(dbNode.toString(), tableNode.toString());
 
-        TitlePanel.addTitle(name);
-        TableCards.addPage(name);
-        TableCards.jumpPage(name);
-        HbaseNameMap.put(dbNode.toString(), tableNode.toString());
+        TitlePanel.add(dbNode.toString(), tableNode.toString());
+        RowCardsPanel.show(name);
     }
 }
