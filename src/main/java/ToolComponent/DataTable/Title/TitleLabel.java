@@ -1,6 +1,7 @@
 package ToolComponent.DataTable.Title;
 
-import ToolComponent.DataTable.ColumnTable.ColumnButtonPanel;
+import ToolComponent.DataTable.ColumnTable.ColumnCard;
+import ToolComponent.DataTable.ColumnTable.ColumnCardsPanel;
 import ToolComponent.DataTable.RowTable.RowCardsPanel;
 import util.CollectionTools;
 import util.CustomIcon;
@@ -76,7 +77,8 @@ public class TitleLabel extends JPanel {
 
         setToolTipText(name);
 
-        RowCardsPanel.addPage(dbName, tableName);
+        ColumnCard columnCard = ColumnCardsPanel.addPage(dbName, tableName);
+        RowCardsPanel.addPage(dbName, tableName, columnCard);
 
         // 标签 - 鼠标事件
         addMouseListener(new MouseAdapter() {
@@ -172,6 +174,7 @@ public class TitleLabel extends JPanel {
         });
     }
 
+
     /**
      * 关闭标签
      */
@@ -181,6 +184,7 @@ public class TitleLabel extends JPanel {
         }
         TitlePanel.removeTitle(this);
         RowCardsPanel.removePage(name);
+        ColumnCardsPanel.removePage(name);
     }
 
     /**
@@ -212,7 +216,6 @@ public class TitleLabel extends JPanel {
             oldSelectedTitle.IS_Select = false;
             TitlePanel.setSelectedLabel(null);
         }
-        ColumnButtonPanel.init();
     }
 
     // 获取名称

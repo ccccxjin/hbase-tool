@@ -18,8 +18,7 @@ public class CustomJButton extends JButton {
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                setBorder(new LineBorder(new Color(224, 255, 255)));
-                setForeground(new Color(174, 186, 229));
+                setBorder(new LineBorder(new Color(91, 154, 227), 2));
             }
 
             @Override

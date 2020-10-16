@@ -1,8 +1,5 @@
-package ToolComponent.DataTable.RowTable;
+package ToolComponent.DataTable.ColumnTable;
 
-import ToolComponent.DataTable.ColumnTable.ColumnButtonView;
-import ToolComponent.DataTable.ColumnTable.ColumnModel;
-import ToolComponent.DataTable.ColumnTable.ColumnTableView;
 import ToolComponent.DataTable.DataTablePanel;
 import com.alibaba.fastjson.JSON;
 import util.CONSTANT;
@@ -13,22 +10,21 @@ import javax.swing.*;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class RowModel {
+public class ColumnModel {
 
-    // 名称
     private String name;
 
     // 提示界面
     private static final JFrame jFrame = new JFrame();
 
     // 按钮
-    private RowButtonView buttonPanel;
+    private ColumnButtonView buttonPanel;
 
     // 表格
-    private RowTableView table;
+    private ColumnTableView table;
 
     // 分页
-    private RowPageFooterView pageFooter;
+    private ColumnPageFooterView pageFooter;
 
     // 表格面板数据
     private HashMap<String, Object> buttonInfo;
@@ -42,15 +38,7 @@ public class RowModel {
     private String[][] textData = new String[][]{};
     private String[][] jsonData = new String[][]{};
 
-
-    // column页面信息
-    private ColumnModel columnModel;
-    private ColumnButtonView columnButtonView;
-
-    /**
-     * 构造方法
-     */
-    public RowModel(String name) {
+    public ColumnModel(String name) {
         this.name = name;
     }
 
@@ -110,24 +98,13 @@ public class RowModel {
     }
 
     /**
-     * 跳转到column页面
+     * 连接row页面, 查询详细信息
      */
-    public void switchColumnPage(int index) {
-
-        // 设置该条记录的信息
-        HashMap<String, Object> info = buttonPanel.getButtonInfo();
-
-        info.put("family", textData[index][0]);
-        info.put("column", textData[index][1]);
-
-        // 更新信息
-        columnButtonView.updateButtonInfo(info);
-
-        // 修改数据结构
-        columnButtonView.setDataStruct((String) buttonInfo.get("dataStruct"));
-
-        columnModel.showNewPage(new String[][]{{textData[index][2], textData[index][3]}});
-
+    public void showNewPage(String[][] colData) {
+        data = colData;
+        textData = colData;
+        buttonInfo = buttonPanel.getButtonInfo();
+        postOperation(1, false, "无数据");
     }
 
     /**
@@ -136,7 +113,7 @@ public class RowModel {
     private void query() {
         if (buttonInfo.get("row") != null) {
             try {
-                data = HbaseUtil.getRowData(
+                String[][] detailData = HbaseUtil.getRowData(
                         (String) buttonInfo.get("dbName"),
                         (String) buttonInfo.get("tableName"),
                         (String) buttonInfo.get("row"),
@@ -145,6 +122,14 @@ public class RowModel {
                         (long) buttonInfo.get("minTime"),
                         (long) buttonInfo.get("maxTime"),
                         offset, maxSize, 1);
+
+                data = new String[detailData.length][];
+                if (detailData.length > 0) {
+                    for (int i = 0; i < detailData.length; i++) {
+                        data[i] = new String[]{detailData[i][2], detailData[i][3]};
+                    }
+                }
+
             } catch (IOException exception) {
                 JOptionPane.showMessageDialog(jFrame, "HBase查询失败", "提示", JOptionPane.INFORMATION_MESSAGE);
                 exception.printStackTrace();
@@ -201,9 +186,9 @@ public class RowModel {
     private void showData() {
         String dataStruct = (String) buttonInfo.get("dataStruct");
         if (dataStruct.equals("text")) {
-            table.update(textData, CONSTANT.ROW_TABLE_COLUMNS);
+            table.update(textData, CONSTANT.COLUMN_TABLE_COLUMNS);
         } else if (dataStruct.equals("json")) {
-            table.update(jsonData, CONSTANT.ROW_TABLE_COLUMNS);
+            table.update(jsonData, CONSTANT.COLUMN_TABLE_COLUMNS);
         }
     }
 
@@ -216,11 +201,9 @@ public class RowModel {
             jsonData = new String[textData.length][];
             if (struct.equals("json")) {
                 for (int i = 0; i < textData.length; i++) {
-                    String family = textData[i][0];
-                    String column = textData[i][1];
-                    String timestamp = textData[i][2];
-                    String value = JSON.parseObject(textData[i][3]).toJSONString();
-                    jsonData[i] = new String[]{family, column, timestamp, value};
+                    String timestamp = textData[i][0];
+                    String value = JSON.parseObject(textData[i][1]).toJSONString();
+                    jsonData[i] = new String[]{timestamp, value};
                 }
             }
         }
@@ -242,21 +225,21 @@ public class RowModel {
     /**
      * 设置按钮面板
      */
-    public void setButtonPanel(RowButtonView buttonPanel) {
+    public void setButtonPanel(ColumnButtonView buttonPanel) {
         this.buttonPanel = buttonPanel;
     }
 
     /**
      * 设置表格
      */
-    public void setTable(RowTableView table) {
+    public void setTable(ColumnTableView table) {
         this.table = table;
     }
 
     /**
      * 设置分页
      */
-    public void setPageFooter(RowPageFooterView pageFooter) {
+    public void setPageFooter(ColumnPageFooterView pageFooter) {
         this.pageFooter = pageFooter;
     }
 
@@ -291,7 +274,7 @@ public class RowModel {
         offset = 0;
         maxSize = 0;
         pageFooter.setDesc(getDescribe());
-        table.update(textData, CONSTANT.ROW_TABLE_COLUMNS);
+        table.update(textData, CONSTANT.COLUMN_TABLE_COLUMNS);
     }
 
     /**
@@ -303,16 +286,5 @@ public class RowModel {
         } else {
             return -1;
         }
-    }
-
-    /**
-     * 设置相应的column页面信息
-     */
-    public void setColumnModel(ColumnModel model) {
-        columnModel = model;
-    }
-
-    public void setColumnButtonView(ColumnButtonView buttonView) {
-        this.columnButtonView = buttonView;
     }
 }

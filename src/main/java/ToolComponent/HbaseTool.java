@@ -61,5 +61,4 @@ public class HbaseTool extends JPanel {
         ImageIcon img = new CustomIcon(getClass().getResource(url), CustomIcon.TOOL_SIZE);
         jButton.setIcon(img);
     }
-
 }

@@ -1,6 +1,6 @@
 package ToolComponent.DataTable;
 
-import ToolComponent.DataTable.ColumnTable.ColumnTablePanel;
+import ToolComponent.DataTable.ColumnTable.ColumnCardsPanel;
 import ToolComponent.DataTable.RowTable.RowCardsPanel;
 import ToolComponent.DataTable.Title.TitlePanel;
 
@@ -23,18 +23,22 @@ public class DataTablePanel {
     static {
         splitPane.setDividerSize(5);
         splitPane.setLeftComponent(RowCardsPanel.getCardPanel());
-        splitPane.setRightComponent(ColumnTablePanel.getPanel());
+        splitPane.setRightComponent(ColumnCardsPanel.getCardPanel());
         splitPane.setDividerLocation(0.5);
 
         splitPane.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                splitPane.setDividerLocation(0.6);
+                splitPane.setDividerLocation(0.5);
             }
         });
 
         panel.add(TitlePanel.getTitlePanel(), BorderLayout.NORTH);
         panel.add(splitPane, BorderLayout.CENTER);
+    }
+
+    public static void setDividerLocation() {
+        splitPane.setDividerLocation(0.6);
     }
 
     public static JPanel getPanel() {

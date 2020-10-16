@@ -1,4 +1,4 @@
-package ToolComponent.DataTable.RowTable;
+package ToolComponent.DataTable.ColumnTable;
 
 import util.CustomIcon;
 import util.CustomJButton;
@@ -11,13 +11,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class RowPageFooterView extends JPanel {
+public class ColumnPageFooterView extends JPanel {
 
     // 页数
     private int page;
 
     // model
-    private RowModel model;
+    private ColumnModel model;
 
     // box面板
     private final Box box = Box.createHorizontalBox();
@@ -147,7 +147,7 @@ public class RowPageFooterView extends JPanel {
     }
 
     // 设置model
-    public void setModel(RowModel model) {
+    public void setModel(ColumnModel model) {
         this.model = model;
     }
 

@@ -1,15 +1,12 @@
-package ToolComponent.DataTable.RowTable;
+package ToolComponent.DataTable.ColumnTable;
 
-import ToolComponent.DataTable.ColumnTable.ColumnButtonView;
-import ToolComponent.DataTable.ColumnTable.ColumnCard;
-import ToolComponent.DataTable.ColumnTable.ColumnModel;
 import util.CollectionTools;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
-public class RowCardsPanel {
+public class ColumnCardsPanel {
     // 卡片布局
     private static final CardLayout cardLayout = new CardLayout();
 
@@ -17,19 +14,22 @@ public class RowCardsPanel {
     private static final JPanel cardPanel = new JPanel(cardLayout);
 
     // 面板列表
-    private static final HashMap<String, RowCard> panelHashMap = new HashMap<>();
+    private static final HashMap<String, ColumnCard> panelHashMap = new HashMap<>();
 
 
     /**
      * 添加页面
      */
-    public static void addPage(String dbName, String tableName, ColumnCard columnCard) {
+    public static ColumnCard addPage(String dbName, String tableName) {
         String name = CollectionTools.structTitle(dbName, tableName);
         if (!panelHashMap.containsKey(name)) {
-            RowCard rowCard = new RowCard(dbName, tableName, columnCard);
-            cardPanel.add(rowCard, name);
-            panelHashMap.put(name, rowCard);
+            ColumnCard columnCard = new ColumnCard(dbName, tableName);
+            cardPanel.add(columnCard, name);
+            panelHashMap.put(name, columnCard);
             show(name);
+            return columnCard;
+        } else {
+            return null;
         }
     }
 

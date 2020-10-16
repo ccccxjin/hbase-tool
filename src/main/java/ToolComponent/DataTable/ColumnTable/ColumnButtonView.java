@@ -1,4 +1,4 @@
-package ToolComponent.DataTable.RowTable;
+package ToolComponent.DataTable.ColumnTable;
 
 import org.apache.commons.lang.StringUtils;
 import util.CollectionTools;
@@ -12,21 +12,18 @@ import java.awt.event.MouseEvent;
 import java.text.ParseException;
 import java.util.HashMap;
 
-public class RowButtonView extends JPanel{
+public class ColumnButtonView extends JPanel{
     // 提示界面
-    private final JFrame jFrame = new JFrame();
+    private  static final JFrame jFrame = new JFrame();
 
-    // model
-    private RowModel model;
-
-    // 数据库, 表名
-    private String dbName;
-    private String tableName;
+    // 设置操作模型
+    private ColumnModel model;
 
     // label组件
     private final JLabel rowLabel = new JLabel("row");
     private final JLabel familyLabel = new JLabel("family");
     private final JLabel columnLabel = new JLabel("column");
+    private final JLabel versionLabel = new JLabel("version");
     private final JLabel minTimeLabel = new JLabel("minTime");
     private final JLabel maxTimeLabel = new JLabel("maxTime");
     private final JLabel PageSizeLabel = new JLabel("pageSize");
@@ -35,9 +32,9 @@ public class RowButtonView extends JPanel{
     // 输入框组件
     private final JTextField rowText = new JTextField("00010070");
     private final JTextField familyText = new JTextField();
-    private final JTextField columnText = new JTextField();
-    private final JTextField minTimeText = new JTextField("2018-10-15 16:00:00");
-    private final JTextField maxTimeText = new JTextField("2018-10-16 16:00:00");
+    private final JTextField columnText = new JTextField();private final JTextField versionText = new JTextField();
+    private final JTextField minTimeText = new JTextField();
+    private final JTextField maxTimeText = new JTextField();
     private final JComboBox<String> PageSizeBox = new JComboBox<>(new String[]{"10", "20", "50", "100", "500", "1000", "全部显示",});
     private final JComboBox<String> dataStructBox = new JComboBox<>(new String[]{"text", "json"});
 
@@ -71,6 +68,15 @@ public class RowButtonView extends JPanel{
     private final int FIFTH_COL_X = FOURTH_COL_X + TEXT_WIDTH + NOT_IN_PAIRS;
     private final int SIXTH_COL_X = FIFTH_COL_X + LABEL_WIDTH + IN_PAIRS;
     private final int SEVENTH_COL_X = SIXTH_COL_X + TEXT_WIDTH + NOT_IN_PAIRS;
+    private final int EIGHTH_COL_X = SEVENTH_COL_X + LABEL_WIDTH + IN_PAIRS;
+    private final int NINTH_COL_X = EIGHTH_COL_X + TEXT_WIDTH + NOT_IN_PAIRS;
+
+    // 页面信息
+    private String dbName;
+    private String tableName;
+    private String row;
+    private String family;
+    private String column;
 
     {
         setLayout(null);
@@ -82,11 +88,13 @@ public class RowButtonView extends JPanel{
         jbtMillisecondSecond.setSelected(false);
 
         add(rowLabel);
-        add(familyLabel);
-        add(columnLabel);
         add(rowText);
+        add(familyLabel);
         add(familyText);
+        add(columnLabel);
         add(columnText);
+        add(versionLabel);
+        add(versionText);
         add(minTimeLabel);
         add(maxTimeLabel);
         add(minTimeText);
@@ -101,7 +109,7 @@ public class RowButtonView extends JPanel{
         add(dataStructBox);
 
         rowLabel.setBounds(FIRST_COL_X, FIRST_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
-        rowText.setBounds(SECOND_COL_X, FIRST_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
+        rowText.setBounds(SECOND_COL_X, FIRST_ROW_Y, TEXT_WIDTH, LABEL_HEIGHT);
         familyLabel.setBounds(THIRD_COL_X, FIRST_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
         familyText.setBounds(FOURTH_COL_X, FIRST_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
         columnLabel.setBounds(FIFTH_COL_X, FIRST_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
@@ -111,11 +119,14 @@ public class RowButtonView extends JPanel{
         minTimeText.setBounds(SECOND_COL_X, SECOND_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
         maxTimeLabel.setBounds(THIRD_COL_X, SECOND_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
         maxTimeText.setBounds(FOURTH_COL_X, SECOND_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
-        PageSizeLabel.setBounds(FIFTH_COL_X, SECOND_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
-        PageSizeBox.setBounds(SIXTH_COL_X, SECOND_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
+        versionLabel.setBounds(FIFTH_COL_X, SECOND_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
+        versionText.setBounds(SIXTH_COL_X, SECOND_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
 
-        dataStructLabel.setBounds(FIRST_COL_X, THIRD_ROW_Y, 100, 25);
-        dataStructBox.setBounds(SECOND_COL_X, THIRD_ROW_Y, 100, 25);
+        dataStructLabel.setBounds(FIRST_COL_X, THIRD_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
+        dataStructBox.setBounds(SECOND_COL_X, THIRD_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
+
+        PageSizeLabel.setBounds(THIRD_COL_X, THIRD_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
+        PageSizeBox.setBounds(FOURTH_COL_X, THIRD_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
 
         jbtSearch.setBounds(SECOND_COL_X, FORTH_ROW_Y, 60, 25);
         jbtRefresh.setBounds(THIRD_COL_X, FORTH_ROW_Y, 60, 25);
@@ -178,7 +189,7 @@ public class RowButtonView extends JPanel{
     /**
      * 构造方法
      */
-    public RowButtonView(String dbName, String tableName) {
+    public ColumnButtonView(String dbName, String tableName) {
         this.dbName = dbName;
         this.tableName = tableName;
     }
@@ -186,7 +197,7 @@ public class RowButtonView extends JPanel{
     /**
      * 设置模型
      */
-    public void setModel(RowModel model) {
+    public void setModel(ColumnModel model) {
         this.model = model;
     }
 
@@ -197,9 +208,10 @@ public class RowButtonView extends JPanel{
         return new HashMap<String, Object>(){{
             put("dbName", dbName);
             put("tableName", tableName);
-            put("row", rowText.getText().trim());
-            put("family", familyText.getText().trim());
-            put("column", columnText.getText().trim());
+            put("row", row);
+            put("family", family);
+            put("column", column);
+            put("version", getVersion());
             put("dataStruct", getDataStruct());
             put("pageSize", getPageSize());
             put("minTime", timeProcess(minTimeText.getText().trim()));
@@ -207,6 +219,34 @@ public class RowButtonView extends JPanel{
             put("isCacheMode", jbtCacheMode.isSelected());
             put("isMilliSecondMode", jbtMillisecondSecond.isSelected());
         }};
+    }
+
+    /**
+     * 更新页面信息
+     */
+    public void updateButtonInfo(HashMap<String, Object> buttonInfo) {
+        dbName = (String)buttonInfo.get("dbName");
+        tableName = (String)buttonInfo.get("tableName");
+        row = (String)buttonInfo.get("row");
+        family = (String)buttonInfo.get("family");
+        column = (String)buttonInfo.get("column");
+        minTimeText.setText(timeProcess((long)buttonInfo.get("minTime"), (boolean)buttonInfo.get("isMilliSecondMode")));
+        maxTimeText.setText(timeProcess((long)buttonInfo.get("maxTime"), (boolean)buttonInfo.get("isMilliSecondMode")));
+    }
+
+    /**
+     * 时间处理, 转成 "yyyy-mm-dd hh:mm:ss" 类型
+     */
+    private String timeProcess(long time, boolean isMilliSecondMode) {
+        if (time == 0) {
+            return "";
+        } else {
+            if (isMilliSecondMode) {
+                return CollectionTools.stampToDate(time);
+            } else {
+                return CollectionTools.stampToDate(time * 1000);
+            }
+        }
     }
 
     /**
@@ -235,6 +275,17 @@ public class RowButtonView extends JPanel{
     }
 
     /**
+     * 获取版本号
+     */
+    private int getVersion() {
+        String version = versionText.getText();
+        if (version != null && !version.equals("")) {
+            return Integer.parseInt(version);
+        }
+        return -1;
+    }
+
+    /**
      * 获取数据结构
      */
     private String getDataStruct() {
@@ -257,5 +308,12 @@ public class RowButtonView extends JPanel{
             return 0;
         }
         return Integer.parseInt((String)pageSize);
+    }
+
+    /**
+     * 设置数据结构
+     */
+    public void setDataStruct(String struct) {
+        dataStructBox.setSelectedItem(struct);
     }
 }

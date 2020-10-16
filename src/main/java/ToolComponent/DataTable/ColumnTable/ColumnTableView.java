@@ -1,75 +1,69 @@
 package ToolComponent.DataTable.ColumnTable;
 
-
 import ToolComponent.DataTable.Render.FamilyColumnRenderer;
 import ToolComponent.DataTable.Render.VersionRenderer;
 import util.CONSTANT;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-/**
- * 表格, 视图
- */
-public class ColumnTableView {
+public class ColumnTableView extends JPanel {
 
-    private static final JPanel panel = new JPanel(new GridLayout());
+    // 表格, 模型
+    public DefaultTableModel model = new DefaultTableModel(){
+        public boolean isCellEditable(int rot, int column) {
+            return false;
+        }
+    };
+    private final JTable table = new JTable(model);
 
-    public static DefaultTableModel model = new DefaultTableModel();
-    private static final JTable table = new JTable(model);
-
+    // 表格参数
     private static final float[] columnWidthPercentage = {0.2f, 0.8f};
 
-    static {
+    {
+        setLayout(new GridLayout());
         table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
-        set(new String[][]{}, CONSTANT.COLUMN_TABLE_COLUMNS);
-        setTableRowHeight();
-        panel.add(new JScrollPane(table));
+        init();
+        add(new JScrollPane(table));
     }
 
-    // 设置渲染器
-    public static void setTableRowHeight() {
-        table.getColumnModel().getColumn(1).setCellRenderer(new FamilyColumnRenderer());
-        table.getColumnModel().getColumn(0).setCellRenderer(new VersionRenderer());
+    /**
+     * 初始化表格, 也可以当作清空表格使用
+     * 设置空表格
+     * 设置列宽
+     * 设置渲染器
+     */
+    public void init() {
+        model.setDataVector(new String[][]{}, CONSTANT.COLUMN_TABLE_COLUMNS);
+        table.updateUI();
+        resizeColumns();
+    }
+
+    // 更新数据
+    public void update(String[][] data, String[] columns) {
+        model.getDataVector().clear();
+        model.setDataVector(data, columns);
+        setTableColumnRender();
         resizeColumns();
     }
 
     // 设置列宽
-    private static void resizeColumns() {
-        int tW = table.getWidth();
-        TableColumn column;
-        TableColumnModel jTableColumnModel = table.getColumnModel();
-        int cantCols = jTableColumnModel.getColumnCount();
-        for (int i = 0; i < cantCols; i++) {
-            column = jTableColumnModel.getColumn(i);
-            int pWidth = Math.round(columnWidthPercentage[i] * tW);
-            column.setPreferredWidth(pWidth);
+    private void resizeColumns() {
+        int tableWidth = table.getWidth();
+        TableColumnModel columnModel = table.getColumnModel();
+        for (int i = 0; i < columnModel.getColumnCount(); i++) {
+            int columnWidth = Math.round(columnWidthPercentage[i] * tableWidth);
+            columnModel.getColumn(i).setPreferredWidth(columnWidth);
         }
     }
 
-    // 更新数据并显示
-    public static void update(String name, String[][] data, String[] columns) {
-        clear();
-        model.setDataVector(data, columns);
-        setTableRowHeight();
-    }
-
-    // 修改数据
-    public static void set(String[][] data, String[] columns) {
-        model.setDataVector(data, columns);
-        resizeColumns();
-    }
-
-    // 清空数据
-    public static void clear() {
-        model.getDataVector().clear();
-    }
-
-    // 获取panel
-    public static JPanel getPanel() {
-        return panel;
+    // 设置列渲染器
+    public void setTableColumnRender() {
+        table.getColumnModel().getColumn(1).setCellRenderer(new FamilyColumnRenderer());
+        table.getColumnModel().getColumn(0).setCellRenderer(new VersionRenderer());
     }
 }

@@ -6,7 +6,6 @@ import util.CONSTANT;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -15,8 +14,15 @@ import java.awt.event.MouseEvent;
 public class RowTableView extends JPanel {
 
     // 表格, 模型
-    private final DefaultTableModel model = new DefaultTableModel();
+    public DefaultTableModel model = new DefaultTableModel(){
+        public boolean isCellEditable(int rot, int column) {
+            return false;
+        }
+    };
     private final JTable table = new JTable(model);
+
+    // row 页面操作模型, 不是表格的模型
+    private RowModel rowPageModel;
 
     // 表格参数
     private static final float[] columnWidthPercentage = {0.08f, 0.15f, 0.15f, 0.62f};
@@ -32,9 +38,9 @@ public class RowTableView extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     int index = table.getSelectedRow();
-                    /*
-                    跳转第二个页面操作
-                     */
+                    if (index >= 0) {
+                        rowPageModel.switchColumnPage(index);
+                    }
                 }
             }
         });
@@ -63,12 +69,10 @@ public class RowTableView extends JPanel {
     // 设置列宽
     private void resizeColumns() {
         int tableWidth = table.getWidth();
-        TableColumn column;
-        TableColumnModel jTableColumnModel = table.getColumnModel();
-        for (int i = 0; i < jTableColumnModel.getColumnCount(); i++) {
-            column = jTableColumnModel.getColumn(i);
-            int pWidth = Math.round(columnWidthPercentage[i] * tableWidth);
-            column.setPreferredWidth(pWidth);
+        TableColumnModel columnModel = table.getColumnModel();
+        for (int i = 0; i < columnModel.getColumnCount(); i++) {
+            int columnWidth = Math.round(columnWidthPercentage[i] * tableWidth);
+            columnModel.getColumn(i).setPreferredWidth(columnWidth);
         }
     }
 
@@ -76,5 +80,10 @@ public class RowTableView extends JPanel {
     public void setTableColumnRender() {
         table.getColumnModel().getColumn(3).setCellRenderer(new FamilyColumnRenderer());
         table.getColumnModel().getColumn(2).setCellRenderer(new VersionRenderer());
+    }
+
+    // 设置模型
+    public void setRowPageModel(RowModel rowPageModel) {
+        this.rowPageModel = rowPageModel;
     }
 }
