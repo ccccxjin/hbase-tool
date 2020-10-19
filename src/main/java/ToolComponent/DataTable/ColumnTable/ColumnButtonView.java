@@ -26,17 +26,19 @@ public class ColumnButtonView extends JPanel{
     private final JLabel versionLabel = new JLabel("version");
     private final JLabel minTimeLabel = new JLabel("minTime");
     private final JLabel maxTimeLabel = new JLabel("maxTime");
-    private final JLabel PageSizeLabel = new JLabel("pageSize");
+    private final JLabel pageSizeLabel = new JLabel("pageSize");
     private final JLabel dataStructLabel = new JLabel("数据格式");
+    private final JLabel timeShowLabel = new JLabel("时间显示");
 
     // 输入框组件
-    private final JTextField rowText = new JTextField("00010070");
+    private final JTextField rowText = new JTextField();
     private final JTextField familyText = new JTextField();
     private final JTextField columnText = new JTextField();private final JTextField versionText = new JTextField();
     private final JTextField minTimeText = new JTextField();
     private final JTextField maxTimeText = new JTextField();
-    private final JComboBox<String> PageSizeBox = new JComboBox<>(new String[]{"10", "20", "50", "100", "500", "1000", "全部显示",});
+    private final JComboBox<String> pageSizeBox = new JComboBox<>(new String[]{"10", "20", "50", "100", "500", "1000", "全部显示",});
     private final JComboBox<String> dataStructBox = new JComboBox<>(new String[]{"text", "json"});
+    private final JComboBox<String> timeShowBox = new JComboBox<>(new String[]{"正常时间", "时间戳"});
 
     // 控制组件
     private final JButton jbtSearch = new JButton("查找");
@@ -82,8 +84,8 @@ public class ColumnButtonView extends JPanel{
         setLayout(null);
         setPreferredSize(new Dimension(0, 170));
 
-        PageSizeBox.setEditable(true);
-        PageSizeBox.setSelectedIndex(3);
+        pageSizeBox.setEditable(true);
+        pageSizeBox.setSelectedIndex(3);
         jbtCacheMode.setSelected(false);
         jbtMillisecondSecond.setSelected(false);
 
@@ -99,14 +101,16 @@ public class ColumnButtonView extends JPanel{
         add(maxTimeLabel);
         add(minTimeText);
         add(maxTimeText);
-        add(PageSizeLabel);
-        add(PageSizeBox);
+        add(pageSizeLabel);
+        add(pageSizeBox);
         add(jbtSearch);
         add(jbtRefresh);
         add(jbtCacheMode);
         add(jbtMillisecondSecond);
         add(dataStructLabel);
         add(dataStructBox);
+        add(timeShowLabel);
+        add(timeShowBox);
 
         rowLabel.setBounds(FIRST_COL_X, FIRST_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
         rowText.setBounds(SECOND_COL_X, FIRST_ROW_Y, TEXT_WIDTH, LABEL_HEIGHT);
@@ -124,10 +128,11 @@ public class ColumnButtonView extends JPanel{
 
         dataStructLabel.setBounds(FIRST_COL_X, THIRD_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
         dataStructBox.setBounds(SECOND_COL_X, THIRD_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
-
-        PageSizeLabel.setBounds(THIRD_COL_X, THIRD_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
-        PageSizeBox.setBounds(FOURTH_COL_X, THIRD_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
-
+        timeShowLabel.setBounds(THIRD_COL_X, THIRD_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
+        timeShowBox.setBounds(FOURTH_COL_X, THIRD_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
+        pageSizeLabel.setBounds(FIFTH_COL_X, THIRD_ROW_Y, LABEL_WIDTH, LABEL_HEIGHT);
+        pageSizeBox.setBounds(SIXTH_COL_X, THIRD_ROW_Y, TEXT_WIDTH, TEXT_HEIGHT);
+        
         jbtSearch.setBounds(SECOND_COL_X, FORTH_ROW_Y, 60, 25);
         jbtRefresh.setBounds(THIRD_COL_X, FORTH_ROW_Y, 60, 25);
 
@@ -183,7 +188,19 @@ public class ColumnButtonView extends JPanel{
             }
         });
 
-
+        /*
+         * 切换时间显示
+         */
+        timeShowBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    new Thread(() -> {
+                        model.changeShowTimeMode();
+                    }).start();
+                }
+            }
+        });
     }
 
     /**
@@ -218,6 +235,7 @@ public class ColumnButtonView extends JPanel{
             put("maxTime", timeProcess(maxTimeText.getText().trim()));
             put("isCacheMode", jbtCacheMode.isSelected());
             put("isMilliSecondMode", jbtMillisecondSecond.isSelected());
+            put("timeShowMode", getTimeShowMode());
         }};
     }
 
@@ -300,10 +318,24 @@ public class ColumnButtonView extends JPanel{
     }
 
     /**
+     * 获取时间显示模式
+     */
+    private String getTimeShowMode() {
+        Object mode = timeShowBox.getSelectedItem();
+        if (mode == null || mode.equals("") || mode.equals("正常时间")) {
+            return "正常时间";
+        }
+        if (mode.equals("时间戳")) {
+            return "时间戳";
+        }
+        return "时间戳";
+    }
+
+    /**
      * 获取单页数量
      */
     private int getPageSize() {
-        Object pageSize = PageSizeBox.getSelectedItem();
+        Object pageSize = pageSizeBox.getSelectedItem();
         if (pageSize == null || pageSize.equals("") || pageSize.equals("全部显示")) {
             return 0;
         }

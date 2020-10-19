@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public class ConfigUtil {
 
-    private static final File file = new File(ConfigUtil.class.getResource("/config/connections.ini").getPath());
+    private static final File file = new File(ConfigUtil.class.getResource("src/main/resources/config/connections.ini").getPath());
 
 
     /**

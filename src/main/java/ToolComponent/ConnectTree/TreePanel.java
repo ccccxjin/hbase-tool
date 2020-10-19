@@ -10,22 +10,15 @@ import java.awt.*;
  */
 public class TreePanel {
 
-    private static final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-    private static final JScrollPane topPanel = new JScrollPane();
-    private static final JPanel bottomPanel = new JPanel();
+    private static final JScrollPane scrollPane = new JScrollPane();
 
     static {
-        topPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        topPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        topPanel.setMinimumSize(new Dimension(200, 300));
-        topPanel.getViewport().add(TreeView.getJTree());
-        splitPane.setDividerSize(5);
-        splitPane.setDividerLocation(0.35);
-        splitPane.setTopComponent(topPanel);
-        splitPane.setBottomComponent(bottomPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.getViewport().add(TreeView.getJTree());
     }
 
-    public static JSplitPane getSplitPane() {
-        return splitPane;
+    public static JScrollPane getPanel() {
+        return scrollPane;
     }
 }

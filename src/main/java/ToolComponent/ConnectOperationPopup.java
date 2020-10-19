@@ -210,7 +210,7 @@ public class ConnectOperationPopup {
     public static void connectPopupView(Thread thread, String connectName) {
         JButton jButton = new JButton("取消");
         jButton.addActionListener(e -> {
-            thread.interrupt();
+            thread.stop();
             jFrame.dispose();
         });
         JOptionPane.showOptionDialog(

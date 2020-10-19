@@ -6,6 +6,7 @@ import util.CONSTANT;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -14,7 +15,7 @@ import java.awt.event.MouseEvent;
 public class RowTableView extends JPanel {
 
     // 表格, 模型
-    public DefaultTableModel model = new DefaultTableModel(){
+    private DefaultTableModel model = new DefaultTableModel(){
         public boolean isCellEditable(int rot, int column) {
             return false;
         }
@@ -44,6 +45,7 @@ public class RowTableView extends JPanel {
                 }
             }
         });
+
     }
 
     /**
@@ -82,8 +84,9 @@ public class RowTableView extends JPanel {
         table.getColumnModel().getColumn(2).setCellRenderer(new VersionRenderer());
     }
 
-    // 设置模型
+    // 设置模型, 指操作模型, 不是表格模型
     public void setRowPageModel(RowModel rowPageModel) {
         this.rowPageModel = rowPageModel;
     }
+
 }

@@ -35,8 +35,8 @@ public class ColumnModel {
 
     // 数据
     private String[][] data;
-    private String[][] textData = new String[][]{};
-    private String[][] jsonData = new String[][]{};
+    private String[][] needData = new String[][]{};
+    private String[][] showData = new String[][]{};
 
     public ColumnModel(String name) {
         this.name = name;
@@ -49,7 +49,7 @@ public class ColumnModel {
         buttonInfo = buttonPanel.getButtonInfo();
         preOperation(1, true);
         query();
-        postOperation(1, false,"无数据");
+        postOperation(1, false, "无数据");
     }
 
     /**
@@ -61,7 +61,7 @@ public class ColumnModel {
             preOperation(page, false);
             if (!(boolean) buttonInfo.get("isCacheMode"))
                 query();
-            postOperation(page, true,"第" + page + "页无数据");
+            postOperation(page, true, "第" + page + "页无数据");
         } else {
             JOptionPane.showMessageDialog(jFrame, "第" + page + "页无数据");
         }
@@ -98,11 +98,20 @@ public class ColumnModel {
     }
 
     /**
+     * 切换时间显示
+     */
+    public void changeShowTimeMode() {
+        buttonInfo = buttonPanel.getButtonInfo();
+        parseData();
+        showData();
+    }
+
+    /**
      * 连接row页面, 查询详细信息
      */
     public void showNewPage(String[][] colData) {
         data = colData;
-        textData = colData;
+        needData = colData;
         buttonInfo = buttonPanel.getButtonInfo();
         postOperation(1, false, "无数据");
     }
@@ -111,7 +120,7 @@ public class ColumnModel {
      * 查找数据
      */
     private void query() {
-        if (buttonInfo.get("row") != null) {
+        if (buttonInfo.get("row") != null && !(buttonInfo.get("row")).equals("")) {
             try {
                 String[][] detailData = HbaseUtil.getRowData(
                         (String) buttonInfo.get("dbName"),
@@ -121,7 +130,9 @@ public class ColumnModel {
                         (String) buttonInfo.get("column"),
                         (long) buttonInfo.get("minTime"),
                         (long) buttonInfo.get("maxTime"),
-                        offset, maxSize, 1);
+                        offset, maxSize,
+                        (int) buttonInfo.get("version")
+                );
 
                 data = new String[detailData.length][];
                 if (detailData.length > 0) {
@@ -134,6 +145,8 @@ public class ColumnModel {
                 JOptionPane.showMessageDialog(jFrame, "HBase查询失败", "提示", JOptionPane.INFORMATION_MESSAGE);
                 exception.printStackTrace();
             }
+        } else {
+            data = new String[][]{};
         }
     }
 
@@ -160,10 +173,10 @@ public class ColumnModel {
             if ((boolean) buttonInfo.get("isCacheMode")) {
                 int minDataRange = (page - 1) * (int) buttonInfo.get("pageSize");
                 int length = Math.min((int) buttonInfo.get("pageSize"), data.length - minDataRange);
-                textData = new String[length][];
-                System.arraycopy(data, minDataRange, textData, 0, length);
+                needData = new String[length][];
+                System.arraycopy(data, minDataRange, needData, 0, length);
             } else {
-                textData = data;
+                needData = data;
             }
             parseData();
             showData();
@@ -184,26 +197,53 @@ public class ColumnModel {
      * 显示数据
      */
     private void showData() {
-        String dataStruct = (String) buttonInfo.get("dataStruct");
-        if (dataStruct.equals("text")) {
-            table.update(textData, CONSTANT.COLUMN_TABLE_COLUMNS);
-        } else if (dataStruct.equals("json")) {
-            table.update(jsonData, CONSTANT.COLUMN_TABLE_COLUMNS);
-        }
+        table.update(showData, CONSTANT.COLUMN_TABLE_COLUMNS);
     }
 
     /**
      * 构造数据
      */
     private void parseData() {
-        String struct = (String) buttonInfo.get("dataStruct");
-        if (textData.length != 0) {
-            jsonData = new String[textData.length][];
+        showData = new String[needData.length][];
+
+        if (needData.length != 0) {
+            for (int i = 0; i < needData.length; i++) {
+                String timestamp = needData[i][0];
+                String value = needData[i][1];
+                showData[i] = new String[]{timestamp, value};
+            }
+
+            // 数据结构, 如果是json数据, 改为json格式
+            String struct = (String) buttonInfo.get("dataStruct");
             if (struct.equals("json")) {
-                for (int i = 0; i < textData.length; i++) {
-                    String timestamp = textData[i][0];
-                    String value = JSON.parseObject(textData[i][1]).toJSONString();
-                    jsonData[i] = new String[]{timestamp, value};
+                for (int i = 0; i < needData.length; i++) {
+                    try {
+                        showData[i][1] = JSON.parseObject(needData[i][1]).toJSONString();
+                    } catch (Exception e) {
+                        showData[i][1] = needData[i][1];
+                    }
+                }
+            }
+
+            // 时间戳, 如果是正常时间, 改为format格式
+            String timeShowMode = (String) buttonInfo.get("timeShowMode");
+            if (timeShowMode.equals("正常时间")) {
+                if ((boolean) buttonInfo.get("isMilliSecondMode")) {
+                    for (int i = 0; i < needData.length; i++) {
+                        try {
+                            showData[i][0] = CollectionTools.stampToDate(Long.parseLong(needData[i][0]));
+                        } catch (Exception e) {
+                            showData[i][0] = needData[i][0];
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < needData.length; i++) {
+                        try {
+                            showData[i][0] = CollectionTools.stampToDate(Long.parseLong(needData[i][0]) * 1000);
+                        } catch (Exception e) {
+                            showData[i][0] = needData[i][0];
+                        }
+                    }
                 }
             }
         }
@@ -257,7 +297,7 @@ public class ColumnModel {
      */
     private String getDescribe() {
         if ((boolean) buttonInfo.get("isCacheMode")) {
-            return "共" + data.length + "条数据, 分" + (int) Math.ceil((double) data.length / (double) (int) buttonInfo.get("pageSize")) + "页, 当前页面" + textData.length + "条数据";
+            return "共" + data.length + "条数据, 分" + (int) Math.ceil((double) data.length / (double) (int) buttonInfo.get("pageSize")) + "页, 当前页面" + needData.length + "条数据";
         } else {
             return data.length + "条数据";
         }
@@ -268,13 +308,13 @@ public class ColumnModel {
      */
     private void init() {
         data = new String[][]{};
-        textData = new String[][]{};
-        jsonData = new String[][]{};
+        needData = new String[][]{};
+        showData = new String[][]{};
         pageFooter.setPage(0);
         offset = 0;
         maxSize = 0;
         pageFooter.setDesc(getDescribe());
-        table.update(textData, CONSTANT.COLUMN_TABLE_COLUMNS);
+        table.update(needData, CONSTANT.COLUMN_TABLE_COLUMNS);
     }
 
     /**
