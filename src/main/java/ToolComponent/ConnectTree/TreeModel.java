@@ -29,9 +29,10 @@ public class TreeModel {
             data = operation.read();
             for (String name : data.keySet()) {
                 root.add(new DefaultMutableTreeNode(name));
-                model = new DefaultTreeModel(root);
             }
+            model = new DefaultTreeModel(root);
         } catch (Exception e) {
+            e.printStackTrace();
             MessageDialogUtil.errorExit("读取配置文件失败");
         }
     }
@@ -160,11 +161,9 @@ public class TreeModel {
     public static void destroy() {
         try {
             operation.destroy();
-            model.reload();
         } catch (IOException e) {
             // 记录日志
         }
-        System.out.println("程序已关闭");
     }
 }
 

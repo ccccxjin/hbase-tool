@@ -4,6 +4,7 @@ import util.HbaseWindowListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Properties;
 
 
 /**
@@ -65,6 +66,7 @@ public class HbaseFrame extends JFrame {
 
     public static void main(String[] args) {
         HbaseFrame hbaseFrame = new HbaseFrame();
+        hbaseFrame.setTitle("hbase-tool");
         hbaseFrame.setSize(600, 300);
         hbaseFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         hbaseFrame.setVisible(true);

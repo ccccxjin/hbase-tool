@@ -20,7 +20,6 @@ public class ConnectOperationPopup {
 
     private static final JFrame jFrame = new JFrame();
     private static final Lock lock = new ReentrantLock();
-    private static final Condition condition = lock.newCondition();
     private static boolean connectStatus;
 
     /**
@@ -210,7 +209,7 @@ public class ConnectOperationPopup {
     public static void connectPopupView(Thread thread, String connectName) {
         JButton jButton = new JButton("取消");
         jButton.addActionListener(e -> {
-            thread.stop();
+            thread.interrupt();
             jFrame.dispose();
         });
         JOptionPane.showOptionDialog(
@@ -255,34 +254,24 @@ public class ConnectOperationPopup {
             return;
         }
 
-        Thread thread1 = new Thread(() -> {
-            lock.lock();
+        // thread 连接hbase
+        Thread thread = new Thread(() -> {
             connectStatus = TreeModel.connect(node);
             TreeView.getJTree().expandPath(path);
-            condition.signal();
-            lock.unlock();
+            jFrame.dispose();
+            jFrame.dispose();
+            jFrame.dispose();
+            if (!connectStatus) {
+                JOptionPane.showMessageDialog(jFrame, "连接失败");
+            }
         });
 
+        // 新建线程, 弹框提示正在连接
         new Thread(() -> {
-            connectPopupView(thread1, connectName);
+            connectPopupView(thread, connectName);
         }).start();
 
-        Thread thread2 = new Thread(() -> {
-            lock.lock();
-            try {
-                condition.await();
-            } catch (InterruptedException e) {
-                thread1.interrupt();
-                JOptionPane.showMessageDialog(jFrame, "连接超时", "提示", JOptionPane.INFORMATION_MESSAGE);
-            }
-            jFrame.dispose();
-            jFrame.dispose();
-            lock.unlock();
-            jFrame.dispose();
-        });
-
-        thread2.start();
-        thread1.start();
+        thread.start();
     }
 
 

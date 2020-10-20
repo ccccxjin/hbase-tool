@@ -17,7 +17,7 @@ public class JTreeOperation {
     private final JTreeCacheStruct cache = new JTreeCacheStruct();
 
     // 列表 --> 已连接的connection
-    private final HashSet<String> connected = new HashSet<>();
+    private final ArrayList<String> connected = new ArrayList<>();
 
     /**
      * 读取所有连接参数
@@ -113,10 +113,11 @@ public class JTreeOperation {
     }
 
     public void destroy() throws IOException {
-        for (String name : connected) {
+        System.out.println(connected.toString());
+        while (!connected.isEmpty()) {
+            // 尽量从第一个删除, 连接不上的connection, 会排在后面, 关闭程序时, 不会卡住
+            String name = connected.get(0);
             disConnect(name);
         }
-        connected.clear();
     }
-
 }

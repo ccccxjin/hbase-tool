@@ -3,6 +3,7 @@ package util;
 import org.ini4j.Ini;
 import org.ini4j.Profile;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,8 +11,24 @@ import java.util.HashMap;
 
 public class ConfigUtil {
 
-    private static final File file = new File(ConfigUtil.class.getResource("src/main/resources/config/connections.ini").getPath());
+    private static final File file;
 
+    static {
+        File targetFile = new File("C:\\HbaseTool\\connections.ini");
+        if (!targetFile.exists()) {
+            targetFile.getParentFile().mkdirs();
+        }
+        if (!targetFile.exists()) {
+            try {
+                targetFile.createNewFile();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(new JFrame(), "初始化错误");
+            }
+        }
+        file = new File("C:\\HbaseTool\\connections.ini");
+    }
+
+//    private static final File file = new File(ConfigUtil.class.getResource("/config/connections.ini").getPath());
 
     /**
      * 读取配置文件
